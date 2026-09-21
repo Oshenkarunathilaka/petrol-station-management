@@ -15,7 +15,9 @@ export async function updateSession(request: NextRequest) {
           return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
+          cookiesToSet.forEach(({ name, value }) =>
+            request.cookies.set(name, value)
+          )
           supabaseResponse = NextResponse.next({
             request,
           })
@@ -27,18 +29,32 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
+  // IMPORTANT: Do NOT place any logic between createServerClient and
+  // supabase.auth.getUser(). A simple mistake here can lead to users
+  // being randomly logged out.
   const {
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (
-    !user &&
-    !request.nextUrl.pathname.startsWith('/login') &&
-    !request.nextUrl.pathname.startsWith('/auth')
-  ) {
-    // no user, potentially respond by redirecting the user to the login page
+  const pathname = request.nextUrl.pathname
+
+  // Public routes that don't require authentication
+  const publicRoutes = ['/login']
+  const isPublicRoute = publicRoutes.some((route) => pathname.startsWith(route))
+
+  // If user is NOT authenticated and is trying to access a protected route,
+  // redirect to /login
+  if (!user && !isPublicRoute) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
+    return NextResponse.redirect(url)
+  }
+
+  // If user IS authenticated and is trying to access /login,
+  // redirect to /dashboard
+  if (user && isPublicRoute) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/dashboard'
     return NextResponse.redirect(url)
   }
 
