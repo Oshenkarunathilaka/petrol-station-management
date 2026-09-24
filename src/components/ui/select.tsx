@@ -6,7 +6,63 @@ import { Select as SelectPrimitive } from "@base-ui/react/select"
 import { cn } from "cn"
 import { ChevronDownIcon, CheckIcon, ChevronUpIcon } from "lucide-react"
 
-const Select = SelectPrimitive.Root
+type SelectProps = React.ComponentProps<typeof SelectPrimitive.Root>;
+type SelectItemProps = React.ComponentProps<typeof SelectPrimitive.Item>;
+
+function getTextContent(node: React.ReactNode): string {
+  if (typeof node === "string" || typeof node === "number") {
+    return String(node);
+  }
+
+  if (Array.isArray(node)) {
+    return node.map(getTextContent).join("");
+  }
+
+  if (React.isValidElement(node)) {
+    return getTextContent((node.props as { children?: React.ReactNode }).children);
+  }
+
+  return "";
+}
+
+function collectSelectItems(
+  node: React.ReactNode,
+  items: Record<string, React.ReactNode>,
+): Record<string, React.ReactNode> {
+  React.Children.forEach(node, child => {
+    if (!React.isValidElement(child)) {
+      return;
+    }
+
+    if (child.type === SelectItem) {
+      const { value, children, label } = child.props as SelectItemProps;
+
+      if (value != null) {
+        items[String(value)] = label ?? getTextContent(children);
+      }
+
+      return;
+    }
+
+    collectSelectItems((child.props as { children?: React.ReactNode }).children, items);
+  });
+
+  return items;
+}
+
+function Select({ children, items: providedItems, ...props }: SelectProps) {
+  const childItems = React.useMemo(
+    () => collectSelectItems(children, {}),
+    [children],
+  );
+  const items = providedItems ?? childItems;
+
+  return (
+    <SelectPrimitive.Root {...props} items={items}>
+      {children}
+    </SelectPrimitive.Root>
+  );
+}
 
 function SelectGroup({ className, ...props }: SelectPrimitive.Group.Props) {
   return (
