@@ -16,7 +16,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -25,6 +24,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
+import { SIDEBAR_NAV_ITEMS } from '@/config/permissions';
 import { ProfileWithRole } from '@/types/auth';
 import { LogoutButton } from '@/components/auth/logout-button';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
@@ -46,6 +46,37 @@ export function Header({ profile }: HeaderProps) {
   const pathname = usePathname();
   const router = useRouter();
   const paths = pathname.split('/').filter(Boolean);
+  const [searchOpen, setSearchOpen] = React.useState(false);
+  const [searchQuery, setSearchQuery] = React.useState('');
+  const searchableItems = React.useMemo(() => {
+    const normalizedQuery = searchQuery.trim().toLowerCase();
+    if (!normalizedQuery) return [];
+
+    return SIDEBAR_NAV_ITEMS.filter((item) => {
+      const isAllowed = !profile?.role_name || item.allowedRoles.includes(profile.role_name);
+      const searchableText = `${item.title} ${item.href}`.toLowerCase();
+      return isAllowed && searchableText.includes(normalizedQuery);
+    });
+  }, [profile, searchQuery]);
+
+  const navigateToSearchResult = (href: string) => {
+    setSearchOpen(false);
+    setSearchQuery('');
+    router.push(href);
+  };
+
+  const handleSearchKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Escape') {
+      setSearchOpen(false);
+      setSearchQuery('');
+    }
+
+    if (event.key === 'Enter' && searchableItems.length === 1) {
+      event.preventDefault();
+      navigateToSearchResult(searchableItems[0].href);
+    }
+  };
+
   const roleBadgeClass = ROLE_COLORS[profile?.role_name || ''] || 'bg-muted text-muted-foreground';
 
   return (
@@ -77,13 +108,62 @@ export function Header({ profile }: HeaderProps) {
       </div>
 
       <div className="flex items-center gap-3">
-        <div className="hidden md:flex relative w-64">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+        <div className="relative hidden w-64 md:block">
+          <Search className="pointer-events-none absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             type="search"
-            placeholder="Search..."
+            value={searchQuery}
+            placeholder="Search pages..."
+            aria-label="Search dashboard pages"
+            role="combobox"
+            aria-expanded={searchOpen && searchQuery.trim().length > 0}
+            aria-controls="dashboard-search-results"
             className="w-full pl-9 bg-muted/50 border-border/50 focus:border-primary/50 transition-colors"
+            onChange={(event) => {
+              setSearchQuery(event.target.value);
+              setSearchOpen(true);
+            }}
+            onFocus={() => setSearchOpen(true)}
+            onKeyDown={handleSearchKeyDown}
           />
+
+          {searchOpen && searchQuery.trim().length > 0 && (
+            <div
+              id="dashboard-search-results"
+              role="listbox"
+              className="absolute left-0 right-0 top-10 z-50 overflow-hidden rounded-lg border bg-popover p-1 text-popover-foreground shadow-lg"
+              onBlur={(event) => {
+                if (!event.currentTarget.contains(event.relatedTarget)) {
+                  setSearchOpen(false);
+                }
+              }}
+            >
+              {searchableItems.length > 0 ? (
+                searchableItems.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <button
+                      key={item.href}
+                      type="button"
+                      role="option"
+                      aria-selected={false}
+                      className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none"
+                      onMouseDown={(event) => event.preventDefault()}
+                      onClick={() => navigateToSearchResult(item.href)}
+                    >
+                      <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
+                      <span className="min-w-0 flex-1 truncate">{item.title}</span>
+                      <span className="truncate text-xs text-muted-foreground">{item.href}</span>
+                    </button>
+                  );
+                })
+              ) : (
+                <p className="px-3 py-3 text-sm text-muted-foreground">
+                  No matching pages found.
+                </p>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Theme toggle */}
