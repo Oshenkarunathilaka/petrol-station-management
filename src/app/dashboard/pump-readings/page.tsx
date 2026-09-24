@@ -87,11 +87,11 @@ export default async function PumpReadingsPage({
         <div className="flex-1">
           <label className="text-sm font-medium mb-1 block">Filter by Pump</label>
           <div className="flex flex-wrap gap-2">
-            <Link href={`/dashboard/pumps/readings${date ? `?date=${date}` : ''}`}>
+            <Link href={`/dashboard/pump-readings${date ? `?date=${date}` : ''}`}>
               <Badge variant={!pumpId ? 'default' : 'outline'} className="cursor-pointer">All Pumps</Badge>
             </Link>
             {pumps?.map(p => (
-              <Link key={p.id} href={`/dashboard/pumps/readings?pumpId=${p.id}${date ? `&date=${date}` : ''}`}>
+              <Link key={p.id} href={`/dashboard/pump-readings?pumpId=${p.id}${date ? `&date=${date}` : ''}`}>
                 <Badge variant={pumpId === p.id ? 'default' : 'outline'} className="cursor-pointer">{p.pump_number}</Badge>
               </Link>
             ))}
@@ -99,10 +99,10 @@ export default async function PumpReadingsPage({
         </div>
         <div>
           <label className="text-sm font-medium mb-1 block">Date Filter</label>
-          <Link href={`/dashboard/pumps/readings${pumpId ? `?pumpId=${pumpId}` : ''}`}>
+          <Link href={`/dashboard/pump-readings${pumpId ? `?pumpId=${pumpId}` : ''}`}>
             <Badge variant={!date ? 'default' : 'outline'} className="cursor-pointer mr-2">All Time</Badge>
           </Link>
-          <Link href={`/dashboard/pumps/readings?date=${new Date().toISOString().split('T')[0]}${pumpId ? `&pumpId=${pumpId}` : ''}`}>
+          <Link href={`/dashboard/pump-readings?date=${new Date().toISOString().split('T')[0]}${pumpId ? `&pumpId=${pumpId}` : ''}`}>
             <Badge variant={date ? 'default' : 'outline'} className="cursor-pointer">Today</Badge>
           </Link>
         </div>

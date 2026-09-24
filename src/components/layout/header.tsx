@@ -30,6 +30,7 @@ import { ProfileWithRole } from '@/types/auth';
 import { DashboardNotification } from '@/types/notifications';
 import { LogoutButton } from '@/components/auth/logout-button';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
+import { APP_VERSION } from '@/lib/version';
 
 // Role badge colors
 const ROLE_COLORS: Record<string, string> = {
@@ -167,6 +168,11 @@ export function Header({ profile, notifications }: HeaderProps) {
               )}
             </div>
           )}
+        </div>
+
+        {/* Version indicator */}
+        <div className="flex items-center text-xs font-semibold px-2 py-1 bg-secondary text-secondary-foreground rounded-md border shadow-sm">
+          v{APP_VERSION}
         </div>
 
         {/* Theme toggle */}

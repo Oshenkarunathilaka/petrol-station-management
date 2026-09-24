@@ -20,6 +20,8 @@ import {
 import { SIDEBAR_NAV_ITEMS } from '@/config/permissions';
 import { UserRole } from '@/types/auth';
 
+import { APP_VERSION } from '@/lib/version';
+
 export function AppSidebar({ userRole }: { userRole: UserRole | null }) {
   const pathname = usePathname();
 
@@ -97,6 +99,10 @@ export function AppSidebar({ userRole }: { userRole: UserRole | null }) {
 
         {renderNavGroup('System', system)}
       </SidebarContent>
+
+      <div className="p-4 border-t border-sidebar-border text-center">
+        <span className="text-xs text-sidebar-foreground/50 font-medium">Version {APP_VERSION}</span>
+      </div>
     </Sidebar>
   );
 }
