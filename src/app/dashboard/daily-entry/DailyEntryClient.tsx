@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Droplet, Fuel, Calculator, Save, User, TrendingUp, Loader2 } from 'lucide-react';
+import { Droplet, Fuel, Calculator, Save, User, TrendingUp, Loader2, Settings2 } from 'lucide-react';
 import { updateFuelPrice, submitPumpReading } from './actions';
 
 interface FuelType {
@@ -90,7 +91,7 @@ export default function DailyEntryClient({
 
   const handleNozzleSelect = (nozzleId: string) => {
     setSelectedNozzle(nozzleId);
-    const nozzle = pumps.find(p => p.id === selectedPump)?.nozzles.find(n => n.id === nozzleId);
+    const nozzle = activePump?.nozzles.find(n => n.id === nozzleId);
     if (nozzle) {
       setOpeningMeter(nozzle.last_meter.toString());
     }
@@ -273,11 +274,11 @@ export default function DailyEntryClient({
             </div>
           </div>
 
-          {activePump && (
+          {activePump && activePump.nozzles.length > 0 && (
             <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
               <Label>Nozzle (Fuel Type)</Label>
-              <Select value={selectedNozzle} onValueChange={handleNozzleSelect}>
-                <SelectTrigger>
+              <Select key={activePump.id} value={selectedNozzle} onValueChange={handleNozzleSelect}>
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select Nozzle" />
                 </SelectTrigger>
                 <SelectContent>
@@ -285,12 +286,31 @@ export default function DailyEntryClient({
                     const ft = fuelTypes.find(f => f.id === n.fuel_type_id);
                     return (
                       <SelectItem key={n.id} value={n.id}>
-                        Nozzle {n.nozzle_number} - {ft?.name} (Rs. {ft?.price}/L)
+                        Nozzle {n.nozzle_number} - {ft?.name ?? 'Unknown fuel type'} (Rs. {ft?.price ?? 0}/L)
                       </SelectItem>
                     );
                   })}
                 </SelectContent>
               </Select>
+            </div>
+          )}
+
+          {activePump && activePump.nozzles.length === 0 && (
+            <div className="rounded-lg border border-dashed bg-amber-500/10 p-4 text-amber-800 dark:text-amber-300">
+              <div className="flex items-start gap-3">
+                <Settings2 className="mt-0.5 h-5 w-5 shrink-0" />
+                <div className="space-y-2">
+                  <p className="font-medium">No active nozzles configured for {activePump.pump_number}.</p>
+                  <p className="text-sm">
+                    Add a nozzle and assign its fuel type before recording a pump reading.
+                  </p>
+                  <Button asChild variant="outline" size="sm">
+                    <Link href={`/dashboard/pumps/${activePump.id}`}>
+                      Manage nozzles
+                    </Link>
+                  </Button>
+                </div>
+              </div>
             </div>
           )}
 

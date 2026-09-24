@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="Petrol pump">
+  <rect x="4" y="4" width="248" height="248" rx="52" fill="#5c0015" stroke="#d4a017" stroke-width="8" />
+  <rect x="45" y="26" width="104" height="190" rx="18" fill="#fffaf0" stroke="#d4a017" stroke-width="10" />
+  <rect x="66" y="52" width="62" height="54" rx="8" fill="#800020" />
+  <path d="M97 64c-8 10-12 16-12 22a12 12 0 0 0 24 0c0-6-4-12-12-22Z" fill="#d4a017" />
+  <rect x="66" y="126" width="62" height="10" rx="5" fill="#d4a017" />
+  <rect x="66" y="153" width="62" height="10" rx="5" fill="#e9d9bd" />
+  <rect x="31" y="210" width="132" height="20" rx="8" fill="#d4a017" />
+  <path d="M149 68h17c30 0 47 24 47 58v44c0 19-11 31-28 31-8 0-15-3-21-10l-13-15" fill="none" stroke="#fffaf0" stroke-width="19" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M149 68h17c30 0 47 24 47 58v44c0 19-11 31-28 31-8 0-15-3-21-10l-13-15" fill="none" stroke="#d4a017" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="m154 176-13-15" fill="none" stroke="#fffaf0" stroke-width="21" stroke-linecap="round" />
+  <path d="m154 176-13-15" fill="none" stroke="#800020" stroke-width="11" stroke-linecap="round" />
+</svg>

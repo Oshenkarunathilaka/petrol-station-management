@@ -144,6 +144,7 @@ export async function addNozzle(formData: FormData) {
     }
 
     revalidatePath(`/dashboard/pumps/${pump_id}`);
+    revalidatePath('/dashboard/daily-entry');
     return { success: true };
   } catch (error: any) {
     return { error: error.message };
@@ -172,6 +173,7 @@ export async function deleteNozzle(id: string, pump_id: string) {
     });
 
     revalidatePath(`/dashboard/pumps/${pump_id}`);
+    revalidatePath('/dashboard/daily-entry');
     return { success: true };
   } catch (error: any) {
     return { error: error.message };

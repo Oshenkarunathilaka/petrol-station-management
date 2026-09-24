@@ -1,6 +1,30 @@
 import { createClient } from '@/lib/supabase/server';
 import DailyEntryClient from './DailyEntryClient';
 
+interface PumpRow {
+  id: string;
+  pump_number: string;
+}
+
+interface NozzleRow {
+  id: string;
+  pump_id: string;
+  nozzle_number: number;
+  fuel_type_id: string;
+}
+
+interface FuelPriceRow {
+  price_per_liter: number | string;
+  effective_from: string;
+}
+
+interface FuelTypeRow {
+  id: string;
+  name: string;
+  code: string;
+  fuel_prices: FuelPriceRow[];
+}
+
 export const dynamic = 'force-dynamic';
 
 export default async function DailyEntryPage() {
@@ -21,19 +45,19 @@ export default async function DailyEntryPage() {
     .eq('status', 'ACTIVE');
 
   // Format fuel types to get the most recent price
-  const fuelTypes = fuelTypesData?.map((ft: any) => {
-    const prices = ft.fuel_prices || [];
-    const latestPrice = prices.sort((a: any, b: any) => 
+  const fuelTypes = ((fuelTypesData ?? []) as FuelTypeRow[]).map((fuelType) => {
+    const prices = [...fuelType.fuel_prices].sort((a, b) =>
       new Date(b.effective_from).getTime() - new Date(a.effective_from).getTime()
-    )[0]?.price_per_liter || 0;
+    );
+    const latestPrice = Number(prices[0]?.price_per_liter ?? 0);
 
     return {
-      id: ft.id,
-      name: ft.name,
-      code: ft.code,
+      id: fuelType.id,
+      name: fuelType.name,
+      code: fuelType.code,
       price: latestPrice,
     };
-  }) || [];
+  });
 
   // Fetch active employees (pumpmen)
   const { data: employees } = await supabase
@@ -41,20 +65,21 @@ export default async function DailyEntryPage() {
     .select('id, full_name, employee_code')
     .eq('status', 'ACTIVE');
 
-  // Fetch pumps and their nozzles
-  const { data: pumpsData } = await supabase
-    .from('pumps')
-    .select(`
-      id,
-      pump_number,
-      pump_nozzles (
-        id,
-        nozzle_number,
-        fuel_type_id
-      )
-    `)
-    .eq('status', 'ACTIVE')
-    .order('pump_number');
+  // Fetch active pumps and nozzles separately so the nozzle selector does not
+  // depend on an embedded PostgREST relation being available.
+  const [{ data: pumpsData }, { data: nozzlesData }] = await Promise.all([
+    supabase
+      .from('pumps')
+      .select('id, pump_number')
+      .eq('status', 'ACTIVE')
+      .order('pump_number'),
+    supabase
+      .from('pump_nozzles')
+      .select('id, pump_id, nozzle_number, fuel_type_id')
+      .eq('status', 'ACTIVE')
+      .order('pump_id')
+      .order('nozzle_number'),
+  ]);
 
   // Get last meter readings for nozzles to pre-fill opening meter
   const { data: lastReadings } = await supabase
@@ -62,26 +87,32 @@ export default async function DailyEntryPage() {
     .select('nozzle_id, current_meter')
     .order('created_at', { ascending: false });
 
-  // Map latest reading per nozzle
+  // Map latest reading per nozzle. A current meter of zero is still a valid
+  // reading, so use property presence rather than a truthiness check.
   const latestMeterMap: Record<string, number> = {};
-  if (lastReadings) {
-    for (const r of lastReadings) {
-      if (!latestMeterMap[r.nozzle_id]) {
-        latestMeterMap[r.nozzle_id] = r.current_meter;
-      }
+  for (const reading of lastReadings ?? []) {
+    if (!(reading.nozzle_id in latestMeterMap)) {
+      latestMeterMap[reading.nozzle_id] = Number(reading.current_meter);
     }
   }
 
-  const pumps = pumpsData?.map((p: any) => ({
-    id: p.id,
-    pump_number: p.pump_number,
-    nozzles: p.pump_nozzles.map((n: any) => ({
-      id: n.id,
-      nozzle_number: n.nozzle_number,
-      fuel_type_id: n.fuel_type_id,
-      last_meter: latestMeterMap[n.id] || 0
-    }))
-  })) || [];
+  const nozzlesByPump = new Map<string, NozzleRow[]>();
+  for (const nozzle of (nozzlesData ?? []) as NozzleRow[]) {
+    const pumpNozzles = nozzlesByPump.get(nozzle.pump_id) ?? [];
+    pumpNozzles.push(nozzle);
+    nozzlesByPump.set(nozzle.pump_id, pumpNozzles);
+  }
+
+  const pumps = ((pumpsData ?? []) as PumpRow[]).map((pump) => ({
+    id: pump.id,
+    pump_number: pump.pump_number,
+    nozzles: (nozzlesByPump.get(pump.id) ?? []).map((nozzle) => ({
+      id: nozzle.id,
+      nozzle_number: nozzle.nozzle_number,
+      fuel_type_id: nozzle.fuel_type_id,
+      last_meter: latestMeterMap[nozzle.id] ?? 0,
+    })),
+  }));
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
