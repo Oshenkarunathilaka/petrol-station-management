@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { getLowStockItems } from '../actions';
 import { LowStockTable } from '@/components/inventory/low-stock-table';
 

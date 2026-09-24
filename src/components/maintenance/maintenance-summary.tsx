@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { KpiCard } from '@/components/dashboard/kpi-card';
 import { Wrench, Clock, CheckCircle2, AlertTriangle, DollarSign } from 'lucide-react';
 

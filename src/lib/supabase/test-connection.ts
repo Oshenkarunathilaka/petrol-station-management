@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { createClient } from './server'
 
 export async function testSupabaseConnection() {

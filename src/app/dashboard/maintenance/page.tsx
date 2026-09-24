@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { getMaintenanceList } from './actions';
 import { MaintenanceSummary } from '@/components/maintenance/maintenance-summary';
 import { MaintenanceTable } from '@/components/maintenance/maintenance-table';

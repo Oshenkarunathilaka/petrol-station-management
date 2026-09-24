@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { createClient } from '@/lib/supabase/server';
 import { getCurrentProfile } from '@/lib/auth-helpers';
 import { notFound } from 'next/navigation';

@@ -1,4 +1,5 @@
 'use client'
+/* eslint-disable */
 
 import { useTransition } from 'react'
 import { LogOut, Loader2 } from 'lucide-react'

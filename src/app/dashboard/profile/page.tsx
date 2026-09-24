@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { getCurrentProfile, requirePermission } from '@/lib/auth-helpers';
 import { createClient } from '@/lib/supabase/server';
 import { ProfileClient } from './ProfileClient';

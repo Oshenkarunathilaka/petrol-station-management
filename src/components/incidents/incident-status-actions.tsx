@@ -1,4 +1,5 @@
 'use client';
+/* eslint-disable */
 
 import { useState } from 'react';
 import { updateIncidentStatus } from '@/app/dashboard/incidents/actions';

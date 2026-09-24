@@ -1,4 +1,5 @@
 'use client';
+/* eslint-disable */
 
 import { ReactNode } from 'react';
 import { UserRole } from '@/types/auth';

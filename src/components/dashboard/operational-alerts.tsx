@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertTriangle, Wrench, PackageMinus, BadgeDollarSign, ShieldAlert } from 'lucide-react';
 

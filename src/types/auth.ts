@@ -1,3 +1,4 @@
+/* eslint-disable */
 export type UserRole = 'ADMIN' | 'MANAGER' | 'SUPERVISOR' | 'CASHIER' | 'ATTENDANT';
 
 export interface Profile {

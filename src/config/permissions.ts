@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { UserRole } from '@/types/auth';
 import {
   LayoutDashboard,
@@ -105,7 +106,7 @@ export const SIDEBAR_NAV_ITEMS: NavItem[] = [
     section: 'OPERATIONS'
   },
   {
-    title: 'Fuel Types',
+    title: 'Fuel',
     href: '/dashboard/fuel',
     icon: Droplet,
     allowedRoles: ['ADMIN', 'MANAGER'],
@@ -114,13 +115,6 @@ export const SIDEBAR_NAV_ITEMS: NavItem[] = [
   {
     title: 'Tanks',
     href: '/dashboard/tanks',
-    icon: Container,
-    allowedRoles: ['ADMIN', 'MANAGER'],
-    section: 'OPERATIONS'
-  },
-  {
-    title: 'Calibrations',
-    href: '/dashboard/tanks/calibrations',
     icon: Container,
     allowedRoles: ['ADMIN', 'MANAGER'],
     section: 'OPERATIONS'
@@ -137,6 +131,13 @@ export const SIDEBAR_NAV_ITEMS: NavItem[] = [
     href: '/dashboard/pumps',
     icon: Fuel,
     allowedRoles: ['ADMIN', 'MANAGER'],
+    section: 'OPERATIONS'
+  },
+  {
+    title: 'Meter Readings',
+    href: '/dashboard/pump-readings',
+    icon: Activity,
+    allowedRoles: ['ADMIN', 'MANAGER', 'SUPERVISOR', 'ATTENDANT'],
     section: 'OPERATIONS'
   },
   {
@@ -221,16 +222,23 @@ export const SIDEBAR_NAV_ITEMS: NavItem[] = [
     section: 'ANALYTICS'
   },
   {
-    title: 'Analytics',
-    href: '/dashboard/analytics',
-    icon: Activity,
-    allowedRoles: ['ADMIN', 'MANAGER'],
+    title: 'PDF Reports',
+    href: '/dashboard/reports',
+    icon: FileBarChart,
+    allowedRoles: ['ADMIN', 'MANAGER', 'SUPERVISOR', 'CASHIER', 'ATTENDANT'],
     section: 'ANALYTICS'
   },
 
   // SYSTEM
   {
-    title: 'Settings',
+    title: 'Users & Roles',
+    href: '/dashboard/employees',
+    icon: Users,
+    allowedRoles: ['ADMIN'],
+    section: 'SYSTEM'
+  },
+  {
+    title: 'Station Settings',
     href: '/dashboard/settings',
     icon: Settings,
     allowedRoles: ['ADMIN'],

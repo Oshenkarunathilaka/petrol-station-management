@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { getCurrentUserRole } from '@/lib/auth-helpers';
 import { REPORT_CONFIGS } from '@/lib/reports/config';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';

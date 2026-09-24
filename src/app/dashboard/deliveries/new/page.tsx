@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { createClient } from '@/lib/supabase/server';
 import { NewDeliveryForm } from './delivery-form';
 

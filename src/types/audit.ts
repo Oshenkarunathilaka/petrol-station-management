@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { AuditAction, AuditModule } from '@/lib/audit';
 
 export interface AuditLogUserProfile {

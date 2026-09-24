@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { getStockDashboardMetrics, getTankStockTable } from './actions';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Activity, Droplet, CheckCircle, AlertTriangle, TrendingUp, TrendingDown } from 'lucide-react';

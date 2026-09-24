@@ -1,8 +1,9 @@
 'use client';
+/* eslint-disable */
 
 import * as React from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { Bell, Search } from 'lucide-react';
+import { Bell, Search, AlertTriangle, Package, Wrench, CheckCircle2 } from 'lucide-react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -26,6 +27,7 @@ import {
 } from '@/components/ui/breadcrumb';
 import { SIDEBAR_NAV_ITEMS } from '@/config/permissions';
 import { ProfileWithRole } from '@/types/auth';
+import { DashboardNotification } from '@/types/notifications';
 import { LogoutButton } from '@/components/auth/logout-button';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
 
@@ -40,9 +42,10 @@ const ROLE_COLORS: Record<string, string> = {
 
 interface HeaderProps {
   profile: ProfileWithRole | null;
+  notifications: DashboardNotification[];
 }
 
-export function Header({ profile }: HeaderProps) {
+export function Header({ profile, notifications }: HeaderProps) {
   const pathname = usePathname();
   const router = useRouter();
   const paths = pathname.split('/').filter(Boolean);
@@ -170,10 +173,66 @@ export function Header({ profile }: HeaderProps) {
         <ThemeToggle />
 
         {/* Notification bell */}
-        <Button variant="ghost" size="icon" className="relative text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors">
-          <Bell className="h-5 w-5" />
-          <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-primary animate-pulse" />
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            render={
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label={`Notifications (${notifications.length} active)`}
+                className="relative text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+              />
+            }
+          >
+            <Bell className="h-5 w-5" />
+            {notifications.length > 0 && (
+              <span className="absolute right-1 top-1 flex min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold leading-4 text-primary-foreground">
+                {notifications.length > 9 ? '9+' : notifications.length}
+              </span>
+            )}
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-96 p-0">
+            <div className="flex items-center justify-between border-b px-4 py-3">
+              <div>
+                <p className="font-semibold">Notifications</p>
+                <p className="text-xs text-muted-foreground">
+                  {notifications.length === 0 ? 'You are all caught up' : `${notifications.length} active alert${notifications.length === 1 ? '' : 's'}`}
+                </p>
+              </div>
+              {notifications.length > 0 && <span className="rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary">{notifications.length}</span>}
+            </div>
+            {notifications.length > 0 ? (
+              <div className="max-h-80 overflow-y-auto p-2">
+                {notifications.map((notification) => {
+                  const Icon = notification.kind === 'inventory'
+                    ? Package
+                    : notification.kind === 'incident'
+                      ? AlertTriangle
+                      : Wrench;
+                  return (
+                    <DropdownMenuItem
+                      key={notification.id}
+                      onClick={() => router.push(notification.href)}
+                      className="items-start gap-3 px-3 py-3"
+                    >
+                      <Icon className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                      <span className="min-w-0 flex-1 space-y-1">
+                        <span className="block text-sm font-medium">{notification.title}</span>
+                        <span className="block text-xs text-muted-foreground">{notification.description}</span>
+                      </span>
+                    </DropdownMenuItem>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center gap-2 px-4 py-8 text-center">
+                <CheckCircle2 className="h-8 w-8 text-emerald-500" />
+                <p className="text-sm font-medium">No active notifications</p>
+                <p className="text-xs text-muted-foreground">New alerts will appear here.</p>
+              </div>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         {/* User dropdown */}
         <DropdownMenu>

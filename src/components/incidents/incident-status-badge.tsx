@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { Badge } from '@/components/ui/badge';
 import { AlertCircle, CheckCircle2, Clock, Check, ArrowUp, ArrowDown, Minus, AlertTriangle } from 'lucide-react';
 

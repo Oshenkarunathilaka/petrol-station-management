@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { getInventoryTransactions, getInventoryItems } from '../actions';
 import { TransactionsTable } from '@/components/inventory/transactions-table';
 

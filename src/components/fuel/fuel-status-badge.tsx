@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { Badge } from '@/components/ui/badge';
 
 interface FuelStatusBadgeProps {

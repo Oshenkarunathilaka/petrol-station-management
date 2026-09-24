@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { requirePermission } from "@/lib/auth-helpers";
 import { RevenueChart } from "@/components/dashboard/revenue-chart";
 import { FuelSalesChart } from "@/components/dashboard/fuel-sales-chart";

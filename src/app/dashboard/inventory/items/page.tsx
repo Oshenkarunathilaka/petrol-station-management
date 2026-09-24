@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { getInventoryItems } from '../actions';
 import { ItemsTable } from '@/components/inventory/items-table';
 

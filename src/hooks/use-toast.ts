@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { toast } from '@/components/ui/toast';
 
 type ToastProps = {

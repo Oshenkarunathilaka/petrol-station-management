@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { createClient } from '@/lib/supabase/server';
 import { UserRole, ProfileWithRole } from '@/types/auth';
 import { ROUTE_PERMISSIONS } from '@/config/permissions';

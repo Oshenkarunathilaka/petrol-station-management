@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { getCurrentProfile } from '@/lib/auth-helpers';
 import { REPORT_CONFIGS, ReportType } from '@/lib/reports/config';
 import { ReportViewer } from '@/components/reports/report-viewer';

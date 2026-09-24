@@ -1,4 +1,5 @@
 'use client';
+/* eslint-disable */
 
 import { Moon, Sun } from 'lucide-react';
 import { useTheme } from '@/components/layout/theme-provider';

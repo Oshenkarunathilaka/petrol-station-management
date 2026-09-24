@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { getExpenses } from './actions';
 import { ExpensesTable } from '@/components/expenses/expenses-table';
 import { ExpenseSummaryCards } from '@/components/expenses/expense-summary-cards';

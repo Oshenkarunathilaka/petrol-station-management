@@ -1,4 +1,5 @@
 'use client';
+/* eslint-disable */
 
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';

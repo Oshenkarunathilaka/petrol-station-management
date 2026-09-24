@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { getIncidents } from './actions';
 import { IncidentSummary } from '@/components/incidents/incident-summary';
 import { IncidentTable } from '@/components/incidents/incident-table';

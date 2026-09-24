@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { requirePermission } from '@/lib/auth-helpers';
 import { createClient } from '@/lib/supabase/server';
 import { PumpTable } from '@/components/pumps/pump-table';

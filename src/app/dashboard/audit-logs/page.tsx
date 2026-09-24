@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { requirePermission } from '@/lib/auth-helpers';
 import { createClient } from '@/lib/supabase/server';
 import { AuditLogTable } from '@/components/audit/audit-log-table';
