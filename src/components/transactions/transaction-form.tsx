@@ -38,7 +38,7 @@ const formSchema = z.object({
   payment_method: z.string().min(1, 'Payment method is required'),
   employee_id: z.string().min(1, 'Employee is required'),
   shift_id: z.string().min(1, 'Shift is required'),
-  notes: z.string().optional(),
+  notes: z.string().default(''),
 });
 
 interface Pump {
@@ -72,7 +72,7 @@ export function TransactionForm({ pumps, employees, shifts }: TransactionFormPro
   };
 
   const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(formSchema) as any,
     defaultValues: {
       transaction_date: getToday(),
       transaction_time: getNowTime(),
@@ -179,7 +179,7 @@ export function TransactionForm({ pumps, employees, shifts }: TransactionFormPro
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit as any)} className="space-y-6">
         
         {/* TIME & DATE */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border p-4 rounded-md bg-card">
@@ -187,7 +187,7 @@ export function TransactionForm({ pumps, employees, shifts }: TransactionFormPro
           
           <div className="grid grid-cols-2 gap-4">
             <FormField
-              control={form.control}
+              control={form.control as any}
               name="transaction_date"
               render={({ field }) => (
                 <FormItem>
@@ -198,7 +198,7 @@ export function TransactionForm({ pumps, employees, shifts }: TransactionFormPro
               )}
             />
             <FormField
-              control={form.control}
+              control={form.control as any}
               name="transaction_time"
               render={({ field }) => (
                 <FormItem>
@@ -212,7 +212,7 @@ export function TransactionForm({ pumps, employees, shifts }: TransactionFormPro
 
           <div className="grid grid-cols-2 gap-4">
             <FormField
-              control={form.control}
+              control={form.control as any}
               name="employee_id"
               render={({ field }) => (
                 <FormItem>
@@ -228,7 +228,7 @@ export function TransactionForm({ pumps, employees, shifts }: TransactionFormPro
               )}
             />
             <FormField
-              control={form.control}
+              control={form.control as any}
               name="shift_id"
               render={({ field }) => (
                 <FormItem>
@@ -251,7 +251,7 @@ export function TransactionForm({ pumps, employees, shifts }: TransactionFormPro
           <h3 className="md:col-span-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground">2. Dispenser & Fuel</h3>
           
           <FormField
-            control={form.control}
+            control={form.control as any}
             name="pump_id"
             render={({ field }) => (
               <FormItem>
@@ -268,7 +268,7 @@ export function TransactionForm({ pumps, employees, shifts }: TransactionFormPro
           />
 
           <FormField
-            control={form.control}
+            control={form.control as any}
             name="nozzle_id"
             render={({ field }) => (
               <FormItem>
@@ -302,7 +302,7 @@ export function TransactionForm({ pumps, employees, shifts }: TransactionFormPro
           <h3 className="md:col-span-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">3. Financials</h3>
           
           <FormField
-            control={form.control}
+            control={form.control as any}
             name="quantity_liters"
             render={({ field }) => (
               <FormItem>
@@ -314,7 +314,7 @@ export function TransactionForm({ pumps, employees, shifts }: TransactionFormPro
           />
 
           <FormField
-            control={form.control}
+            control={form.control as any}
             name="unit_price"
             render={({ field }) => (
               <FormItem>
@@ -348,7 +348,7 @@ export function TransactionForm({ pumps, employees, shifts }: TransactionFormPro
 
           <div className="md:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
             <FormField
-              control={form.control}
+              control={form.control as any}
               name="payment_method"
               render={({ field }) => (
                 <FormItem>
@@ -367,12 +367,12 @@ export function TransactionForm({ pumps, employees, shifts }: TransactionFormPro
               )}
             />
             <FormField
-              control={form.control}
+              control={form.control as any}
               name="notes"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Notes (Optional)</FormLabel>
-                  <FormControl><Input placeholder="Vehicle number, customer ID..." {...field} /></FormControl>
+                  <FormControl><Input placeholder="Vehicle number, customer ID..." {...field} value={field.value || ''} /></FormControl>
                   <FormMessage />
                 </FormItem>
               )}

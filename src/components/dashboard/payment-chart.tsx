@@ -3,21 +3,11 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 
-const data = [
-  { name: 'Cash', value: 45 },
-  { name: 'Card', value: 35 },
-  { name: 'QR/Mobile', value: 15 },
-  { name: 'Corporate', value: 5 },
-];
+interface PaymentChartProps {
+  data: { name: string; value: number; fill?: string }[];
+}
 
-const COLORS = [
-  'hsl(var(--primary))', 
-  'hsl(var(--primary) / 0.7)', 
-  'hsl(var(--primary) / 0.5)', 
-  'hsl(var(--primary) / 0.3)'
-];
-
-export function PaymentChart() {
+export function PaymentChart({ data }: PaymentChartProps) {
   return (
     <Card className="col-span-1">
       <CardHeader>
@@ -31,23 +21,41 @@ export function PaymentChart() {
               <Pie
                 data={data}
                 cx="50%"
-                cy="45%"
-                innerRadius={60}
-                outerRadius={80}
-                paddingAngle={5}
+                cy="42%"
+                innerRadius={62}
+                outerRadius={88}
+                paddingAngle={4}
                 dataKey="value"
                 stroke="none"
               >
                 {data.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={entry.fill || '#64748b'}
+                    strokeWidth={0}
+                  />
                 ))}
               </Pie>
-              <Tooltip 
-                contentStyle={{ borderRadius: '8px', border: '1px solid hsl(var(--border))' }}
+              <Tooltip
+                contentStyle={{
+                  borderRadius: '10px',
+                  border: '1px solid #9b1c2e40',
+                  background: '#fff',
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.10)',
+                  color: '#1a0508',
+                }}
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                formatter={(value: any) => [`${value}%`, 'Usage']}
+                formatter={(value: any) => [`Rs ${value.toLocaleString()}`, 'Amount']}
               />
-              <Legend verticalAlign="bottom" height={36} iconType="circle" />
+              <Legend
+                verticalAlign="bottom"
+                height={36}
+                iconType="circle"
+                iconSize={10}
+                formatter={(value) => (
+                  <span style={{ fontSize: 12, color: '#374151', fontWeight: 500 }}>{value}</span>
+                )}
+              />
             </PieChart>
           </ResponsiveContainer>
         </div>

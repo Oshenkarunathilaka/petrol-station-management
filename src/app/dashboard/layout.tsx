@@ -24,7 +24,7 @@ export default async function DashboardLayout({
       <div className="flex min-h-screen w-full flex-col lg:flex-row">
         <SidebarInset>
           <Header profile={profile} />
-          <main className="flex flex-1 flex-col min-w-0 p-6 bg-muted/20">
+          <main className="flex flex-1 flex-col min-w-0 p-6 bg-background">
             {children}
           </main>
         </SidebarInset>

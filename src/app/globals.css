@@ -48,73 +48,107 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/* =====================================================
+   MAROON & WHITE THEME - Petrol Station Management
+   Primary:  Maroon  #800020 → oklch(0.38 0.15 20)
+   Sidebar:  Deep Maroon #5c0015 → oklch(0.28 0.13 20)
+   Accent:   Gold   #d4a017
+   ===================================================== */
+
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  --background: oklch(0.99 0 0);
+  --foreground: oklch(0.15 0.02 20);
+  
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  --card-foreground: oklch(0.15 0.02 20);
+  
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
+  --popover-foreground: oklch(0.15 0.02 20);
+
+  /* Maroon primary */
+  --primary: oklch(0.38 0.15 20);
+  --primary-foreground: oklch(1 0 0);
+
+  --secondary: oklch(0.96 0.01 20);
+  --secondary-foreground: oklch(0.38 0.15 20);
+
+  --muted: oklch(0.96 0.005 20);
+  --muted-foreground: oklch(0.50 0.04 20);
+
+  --accent: oklch(0.94 0.015 20);
+  --accent-foreground: oklch(0.38 0.15 20);
+
+  --destructive: oklch(0.55 0.22 25);
+  
+  --border: oklch(0.90 0.01 20);
+  --input: oklch(0.90 0.01 20);
+  --ring: oklch(0.38 0.15 20);
+
+  /* Chart colors — vivid, high-contrast palette */
+  --chart-1: #9b1c2e;       /* deep maroon */
+  --chart-2: #d4731a;       /* rich amber */
+  --chart-3: #1e7a56;       /* emerald green */
+  --chart-4: #1a4fa0;       /* royal blue */
+  --chart-5: #6b3fa0;       /* purple */
+
   --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+
+  /* Sidebar — deep maroon brand */
+  --sidebar: oklch(0.28 0.13 20);
+  --sidebar-foreground: oklch(0.95 0.01 20);
+  --sidebar-primary: oklch(0.38 0.15 20);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.35 0.12 20);
+  --sidebar-accent-foreground: oklch(1 0 0);
+  --sidebar-border: oklch(0.33 0.11 20);
+  --sidebar-ring: oklch(0.60 0.10 20);
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
+  --background: oklch(0.12 0.01 20);
+  --foreground: oklch(0.97 0.005 20);
+
+  --card: oklch(0.17 0.025 20);
+  --card-foreground: oklch(0.97 0.005 20);
+
+  --popover: oklch(0.17 0.025 20);
+  --popover-foreground: oklch(0.97 0.005 20);
+
+  /* Lighter maroon for dark mode */
+  --primary: oklch(0.58 0.17 20);
+  --primary-foreground: oklch(0.10 0 0);
+
+  --secondary: oklch(0.22 0.03 20);
+  --secondary-foreground: oklch(0.97 0.005 20);
+
+  --muted: oklch(0.22 0.03 20);
+  --muted-foreground: oklch(0.65 0.04 20);
+
+  --accent: oklch(0.25 0.04 20);
+  --accent-foreground: oklch(0.97 0.005 20);
+
+  --destructive: oklch(0.65 0.22 25);
+  
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --ring: oklch(0.58 0.17 20);
+
+  /* Chart colors — bright & vivid against dark background */
+  --chart-1: #e84060;       /* bright rose-maroon */
+  --chart-2: #f59c42;       /* vivid amber */
+  --chart-3: #34d399;       /* mint green */
+  --chart-4: #60a5fa;       /* sky blue */
+  --chart-5: #a78bfa;       /* violet */
+
+  /* Sidebar — very deep maroon */
+  --sidebar: oklch(0.16 0.07 20);
+  --sidebar-foreground: oklch(0.93 0.01 20);
+  --sidebar-primary: oklch(0.58 0.17 20);
+  --sidebar-primary-foreground: oklch(0.10 0 0);
+  --sidebar-accent: oklch(0.22 0.06 20);
+  --sidebar-accent-foreground: oklch(0.97 0.005 20);
   --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --sidebar-ring: oklch(0.58 0.17 20);
 }
 
 @layer base {
@@ -127,4 +161,21 @@
   html {
     @apply font-sans;
   }
+}
+
+/* ---- Premium sidebar styling ---- */
+[data-slot="sidebar"] {
+  background: var(--sidebar) !important;
+}
+
+/* Sidebar logo strip */
+.sidebar-logo-strip {
+  background: oklch(0.22 0.12 20);
+  border-bottom: 1px solid oklch(0.33 0.11 20);
+}
+
+/* Active nav item glows maroon */
+[data-active="true"][data-slot="sidebar-menu-button"] {
+  background: oklch(0.48 0.17 20) !important;
+  color: white !important;
 }

@@ -8,9 +8,49 @@ import { PaymentChart } from "@/components/dashboard/payment-chart";
 import { PumpStatus } from "@/components/dashboard/pump-status";
 import { OperationalAlerts } from "@/components/dashboard/operational-alerts";
 import { RecentTransactions } from "@/components/dashboard/recent-transactions";
+import { 
+  getDashboardKPIs, 
+  getRevenueChartData, 
+  getFuelSalesChartData, 
+  getPaymentChartData, 
+  getPumpStatuses, 
+  getOperationalAlerts, 
+  getRecentTransactions,
+  getFilterOptions,
+  DashboardFilters as FiltersType
+} from "@/lib/dashboard-queries";
 
-export default async function DashboardPage() {
+export default async function DashboardPage(props: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
   await requirePermission('/dashboard');
+  
+  const searchParams = await props.searchParams;
+  
+  const filters: FiltersType = {
+    range: (searchParams?.range as string) || 'today',
+    fuelTypeId: (searchParams?.fuelTypeId as string) || 'all',
+    pumpId: (searchParams?.pumpId as string) || 'all',
+    shiftId: (searchParams?.shiftId as string) || 'all',
+  };
+
+  const [
+    kpis,
+    revenueData,
+    fuelSalesData,
+    paymentData,
+    pumps,
+    alerts,
+    transactions,
+    filterOptions
+  ] = await Promise.all([
+    getDashboardKPIs(filters),
+    getRevenueChartData(filters),
+    getFuelSalesChartData(filters),
+    getPaymentChartData(filters),
+    getPumpStatuses(),
+    getOperationalAlerts(),
+    getRecentTransactions(filters),
+    getFilterOptions()
+  ]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -21,76 +61,76 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      <DashboardFilters />
+      <DashboardFilters fuels={filterOptions.fuels} pumps={filterOptions.pumps} shifts={filterOptions.shifts} />
 
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         <div className="col-span-1 xl:col-span-1">
           <KpiCard 
-            title="Today's Revenue" 
-            value="$24,500" 
+            title={filters.range === 'today' ? "Today's Revenue" : "Revenue"} 
+            value={`Rs ${kpis.revenue.value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} 
             icon={DollarSign} 
-            trend="up" 
-            trendValue="12.5% from yesterday"
+            trend={kpis.revenue.trend} 
+            trendValue={kpis.revenue.trendValue}
           />
         </div>
         <div className="col-span-1 xl:col-span-1">
           <KpiCard 
             title="Fuel Sold" 
-            value="15,300 L" 
+            value={`${kpis.volume.value.toLocaleString()} L`} 
             icon={Droplet} 
-            trend="up" 
-            trendValue="8.2% from yesterday"
+            trend={kpis.volume.trend} 
+            trendValue={kpis.volume.trendValue}
           />
         </div>
         <div className="col-span-1 xl:col-span-1">
           <KpiCard 
             title="Total Transactions" 
-            value="452" 
+            value={kpis.transactions.value.toLocaleString()} 
             icon={CreditCard} 
-            trend="up" 
-            trendValue="5% from yesterday"
+            trend={kpis.transactions.trend} 
+            trendValue={kpis.transactions.trendValue}
           />
         </div>
         <div className="col-span-1 xl:col-span-1">
           <KpiCard 
             title="Current Fuel Stock" 
-            value="85,000 L" 
+            value={`${kpis.stock.value.toLocaleString()} L`} 
             icon={Container} 
-            description="Across 4 tanks"
+            description={kpis.stock.description}
           />
         </div>
         <div className="col-span-1 xl:col-span-1">
           <KpiCard 
             title="Active Pumps" 
-            value="3/4" 
+            value={kpis.pumps.value} 
             icon={Fuel} 
-            trend="down" 
-            trendValue="1 pump offline"
+            trend={kpis.pumps.trend} 
+            trendValue={kpis.pumps.trendValue}
           />
         </div>
         <div className="col-span-1 xl:col-span-1">
           <KpiCard 
             title="Stock Variance" 
-            value="25 L" 
+            value={`${kpis.variance.value} L`} 
             icon={AlertCircle} 
-            trend="down" 
-            trendValue="-0.03% (Within limits)"
+            trend={kpis.variance.trend} 
+            trendValue={kpis.variance.trendValue}
           />
         </div>
       </div>
 
       <div className="grid gap-4 grid-cols-1 lg:grid-cols-3">
-        <RevenueChart />
-        <FuelSalesChart />
+        <RevenueChart data={revenueData} />
+        <FuelSalesChart data={fuelSalesData} />
       </div>
 
       <div className="grid gap-4 grid-cols-1 lg:grid-cols-4">
-        <OperationalAlerts />
-        <PaymentChart />
-        <PumpStatus />
+        <OperationalAlerts alerts={alerts} />
+        <PaymentChart data={paymentData} />
+        <PumpStatus pumps={pumps} />
       </div>
 
-      <RecentTransactions />
+      <RecentTransactions transactions={transactions} />
     </div>
   );
 }

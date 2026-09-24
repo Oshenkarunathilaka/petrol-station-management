@@ -7,6 +7,7 @@ import {
   History,
   Truck,
   Users,
+  Building2,
   Briefcase,
   CalendarDays,
   Package,
@@ -15,7 +16,9 @@ import {
   AlertTriangle,
   FileBarChart,
   Settings,
-  Activity
+  Activity,
+  ClipboardList,
+  User
 } from 'lucide-react';
 import { LucideIcon } from 'lucide-react';
 
@@ -34,6 +37,8 @@ export type NavItem = {
 
 export const ROUTE_PERMISSIONS: RoutePermission[] = [
   { path: '/dashboard', allowedRoles: ['ADMIN', 'MANAGER', 'SUPERVISOR', 'CASHIER', 'ATTENDANT'] },
+  { path: '/dashboard/daily-entry', allowedRoles: ['ADMIN', 'MANAGER', 'SUPERVISOR', 'CASHIER', 'ATTENDANT'] },
+  { path: '/dashboard/profile', allowedRoles: ['ADMIN', 'MANAGER', 'SUPERVISOR', 'CASHIER', 'ATTENDANT'] },
   
   // Fuel Management & Infrastructure
   { path: '/dashboard/fuel', allowedRoles: ['ADMIN', 'MANAGER'] },
@@ -54,25 +59,33 @@ export const ROUTE_PERMISSIONS: RoutePermission[] = [
   // Logistics & Inventory
   { path: '/dashboard/deliveries', allowedRoles: ['ADMIN', 'MANAGER', 'SUPERVISOR'] },
   { path: '/dashboard/suppliers', allowedRoles: ['ADMIN', 'MANAGER'] },
-  { path: '/dashboard/inventory', allowedRoles: ['ADMIN', 'MANAGER', 'SUPERVISOR'] },
+  { path: '/dashboard/inventory', allowedRoles: ['ADMIN', 'MANAGER', 'SUPERVISOR', 'CASHIER'] },
+  { path: '/dashboard/inventory/items', allowedRoles: ['ADMIN', 'MANAGER', 'SUPERVISOR'] },
+  { path: '/dashboard/inventory/transactions', allowedRoles: ['ADMIN', 'MANAGER', 'SUPERVISOR', 'CASHIER'] },
+  { path: '/dashboard/inventory/low-stock', allowedRoles: ['ADMIN', 'MANAGER', 'SUPERVISOR'] },
+  { path: '/dashboard/stock', allowedRoles: ['ADMIN', 'MANAGER'] },
+  { path: '/dashboard/stock/reconciliation', allowedRoles: ['ADMIN', 'MANAGER'] },
   
   // HR & Administration
   { path: '/dashboard/employees', allowedRoles: ['ADMIN', 'MANAGER'] },
   { path: '/dashboard/shifts', allowedRoles: ['ADMIN', 'MANAGER', 'SUPERVISOR', 'CASHIER', 'ATTENDANT'] },
   
   // Finances
-  { path: '/dashboard/expenses', allowedRoles: ['ADMIN', 'MANAGER'] },
+  { path: '/dashboard/expenses', allowedRoles: ['ADMIN', 'MANAGER', 'SUPERVISOR', 'CASHIER'] },
+  { path: '/dashboard/expenses/new', allowedRoles: ['ADMIN', 'MANAGER'] },
+  { path: '/dashboard/expenses/[id]', allowedRoles: ['ADMIN', 'MANAGER', 'SUPERVISOR', 'CASHIER'] },
   
   // Maintenance & Issues
-  { path: '/dashboard/maintenance', allowedRoles: ['ADMIN', 'MANAGER', 'SUPERVISOR'] },
-  { path: '/dashboard/incidents', allowedRoles: ['ADMIN', 'MANAGER', 'SUPERVISOR'] },
+  { path: '/dashboard/maintenance', allowedRoles: ['ADMIN', 'MANAGER', 'SUPERVISOR', 'CASHIER', 'ATTENDANT'] },
+  { path: '/dashboard/incidents', allowedRoles: ['ADMIN', 'MANAGER', 'SUPERVISOR', 'CASHIER', 'ATTENDANT'] },
   
   // Reporting
-  { path: '/dashboard/reports', allowedRoles: ['ADMIN', 'MANAGER', 'SUPERVISOR', 'CASHIER'] },
+  { path: '/dashboard/reports', allowedRoles: ['ADMIN', 'MANAGER', 'SUPERVISOR', 'CASHIER', 'ATTENDANT'] },
+  { path: '/dashboard/analytics', allowedRoles: ['ADMIN', 'MANAGER'] },
   
   // System
   { path: '/dashboard/settings', allowedRoles: ['ADMIN'] },
-  { path: '/dashboard/audit-logs', allowedRoles: ['ADMIN'] }
+  { path: '/dashboard/audit-logs', allowedRoles: ['ADMIN', 'MANAGER'] }
 ];
 
 export const SIDEBAR_NAV_ITEMS: NavItem[] = [
@@ -81,6 +94,13 @@ export const SIDEBAR_NAV_ITEMS: NavItem[] = [
     title: 'Dashboard',
     href: '/dashboard',
     icon: LayoutDashboard,
+    allowedRoles: ['ADMIN', 'MANAGER', 'SUPERVISOR', 'CASHIER', 'ATTENDANT'],
+    section: 'OPERATIONS'
+  },
+  {
+    title: 'Daily Entry',
+    href: '/dashboard/daily-entry',
+    icon: ClipboardList,
     allowedRoles: ['ADMIN', 'MANAGER', 'SUPERVISOR', 'CASHIER', 'ATTENDANT'],
     section: 'OPERATIONS'
   },
@@ -140,6 +160,13 @@ export const SIDEBAR_NAV_ITEMS: NavItem[] = [
     allowedRoles: ['ADMIN', 'MANAGER', 'SUPERVISOR', 'CASHIER', 'ATTENDANT'],
     section: 'OPERATIONS'
   },
+  {
+    title: 'Stock',
+    href: '/dashboard/stock',
+    icon: Activity,
+    allowedRoles: ['ADMIN', 'MANAGER'],
+    section: 'OPERATIONS'
+  },
 
   // MANAGEMENT
   {
@@ -152,7 +179,7 @@ export const SIDEBAR_NAV_ITEMS: NavItem[] = [
   {
     title: 'Suppliers',
     href: '/dashboard/suppliers',
-    icon: Users, // Can change icon later if needed
+    icon: Building2,
     allowedRoles: ['ADMIN', 'MANAGER'],
     section: 'MANAGEMENT'
   },
@@ -160,28 +187,28 @@ export const SIDEBAR_NAV_ITEMS: NavItem[] = [
     title: 'Inventory',
     href: '/dashboard/inventory',
     icon: Package,
-    allowedRoles: ['ADMIN', 'MANAGER', 'SUPERVISOR'],
+    allowedRoles: ['ADMIN', 'MANAGER', 'SUPERVISOR', 'CASHIER'],
     section: 'MANAGEMENT'
   },
   {
     title: 'Expenses',
     href: '/dashboard/expenses',
     icon: Receipt,
-    allowedRoles: ['ADMIN', 'MANAGER'],
+    allowedRoles: ['ADMIN', 'MANAGER', 'SUPERVISOR', 'CASHIER'],
     section: 'MANAGEMENT'
   },
   {
     title: 'Maintenance',
     href: '/dashboard/maintenance',
     icon: Wrench,
-    allowedRoles: ['ADMIN', 'MANAGER', 'SUPERVISOR'],
+    allowedRoles: ['ADMIN', 'MANAGER', 'SUPERVISOR', 'CASHIER', 'ATTENDANT'],
     section: 'MANAGEMENT'
   },
   {
     title: 'Incidents',
     href: '/dashboard/incidents',
     icon: AlertTriangle,
-    allowedRoles: ['ADMIN', 'MANAGER', 'SUPERVISOR'],
+    allowedRoles: ['ADMIN', 'MANAGER', 'SUPERVISOR', 'CASHIER', 'ATTENDANT'],
     section: 'MANAGEMENT'
   },
 
@@ -190,7 +217,7 @@ export const SIDEBAR_NAV_ITEMS: NavItem[] = [
     title: 'Reports',
     href: '/dashboard/reports',
     icon: FileBarChart,
-    allowedRoles: ['ADMIN', 'MANAGER', 'SUPERVISOR', 'CASHIER'],
+    allowedRoles: ['ADMIN', 'MANAGER', 'SUPERVISOR', 'CASHIER', 'ATTENDANT'],
     section: 'ANALYTICS'
   },
   {
@@ -213,7 +240,14 @@ export const SIDEBAR_NAV_ITEMS: NavItem[] = [
     title: 'Audit Logs',
     href: '/dashboard/audit-logs',
     icon: Briefcase,
-    allowedRoles: ['ADMIN'],
+    allowedRoles: ['ADMIN', 'MANAGER'],
+    section: 'SYSTEM'
+  },
+  {
+    title: 'My Profile',
+    href: '/dashboard/profile',
+    icon: User,
+    allowedRoles: ['ADMIN', 'MANAGER', 'SUPERVISOR', 'CASHIER', 'ATTENDANT'],
     section: 'SYSTEM'
   }
 ];

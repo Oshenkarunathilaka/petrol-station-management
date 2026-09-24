@@ -104,11 +104,11 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
                   </Badge>
                 </TableCell>
                 <TableCell className="text-right">
-                  <Button variant="outline" size="icon" asChild title="View Details">
-                    <Link href={`/dashboard/transactions/${tx.id}`}>
+                  <Link href={`/dashboard/transactions/${tx.id}`}>
+                    <Button variant="outline" size="icon" title="View Details">
                       <Info className="h-4 w-4" />
-                    </Link>
-                  </Button>
+                    </Button>
+                  </Link>
                 </TableCell>
               </TableRow>
             );

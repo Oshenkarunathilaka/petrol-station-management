@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { getCurrentProfile } from '@/lib/auth-helpers';
+import { createAuditLog } from '@/lib/audit';
 
 async function requireRole(allowedRoles: string[]) {
   const profile = await getCurrentProfile();
@@ -14,7 +15,7 @@ async function requireRole(allowedRoles: string[]) {
 
 export async function addPump(formData: FormData) {
   try {
-    await requireRole(['ADMIN', 'MANAGER']);
+    const profile = await requireRole(['ADMIN', 'MANAGER']);
     const supabase = await createClient();
 
     const pump_number = formData.get('pump_number') as string;
@@ -26,18 +27,28 @@ export async function addPump(formData: FormData) {
       return { error: 'Pump number and status are required.' };
     }
 
-    const { error } = await supabase.from('pumps').insert({
+    const { data: insertedPump, error } = await supabase.from('pumps').insert({
       pump_number,
       location,
       status,
       notes,
-    });
+    }).select().single();
 
     if (error) {
       if (error.code === '23505') {
         return { error: 'Pump number already exists.' };
       }
       return { error: 'Failed to create pump.' };
+    }
+
+    if (insertedPump) {
+      await createAuditLog({
+        action: 'CREATE',
+        module: 'Pumps',
+        recordId: insertedPump.id,
+        newValue: insertedPump,
+        userId: profile.id
+      });
     }
 
     revalidatePath('/dashboard/pumps');
@@ -49,7 +60,7 @@ export async function addPump(formData: FormData) {
 
 export async function updatePump(id: string, formData: FormData) {
   try {
-    await requireRole(['ADMIN', 'MANAGER']);
+    const profile = await requireRole(['ADMIN', 'MANAGER']);
     const supabase = await createClient();
 
     const pump_number = formData.get('pump_number') as string;
@@ -60,6 +71,8 @@ export async function updatePump(id: string, formData: FormData) {
     if (!pump_number || !status) {
       return { error: 'Pump number and status are required.' };
     }
+
+    const { data: oldPump } = await supabase.from('pumps').select('*').eq('id', id).single();
 
     const { error } = await supabase.from('pumps').update({
       pump_number,
@@ -75,6 +88,15 @@ export async function updatePump(id: string, formData: FormData) {
       return { error: 'Failed to update pump.' };
     }
 
+    await createAuditLog({
+      action: 'UPDATE',
+      module: 'Pumps',
+      recordId: id,
+      oldValue: oldPump,
+      newValue: { pump_number, location, status, notes },
+      userId: profile.id
+    });
+
     revalidatePath('/dashboard/pumps');
     revalidatePath(`/dashboard/pumps/${id}`);
     return { success: true };
@@ -85,7 +107,7 @@ export async function updatePump(id: string, formData: FormData) {
 
 export async function addNozzle(formData: FormData) {
   try {
-    await requireRole(['ADMIN', 'MANAGER']);
+    const profile = await requireRole(['ADMIN', 'MANAGER']);
     const supabase = await createClient();
 
     const pump_id = formData.get('pump_id') as string;
@@ -97,18 +119,28 @@ export async function addNozzle(formData: FormData) {
       return { error: 'All fields are required and nozzle number must be greater than zero.' };
     }
 
-    const { error } = await supabase.from('pump_nozzles').insert({
+    const { data: insertedNozzle, error } = await supabase.from('pump_nozzles').insert({
       pump_id,
       nozzle_number,
       fuel_type_id,
       status,
-    });
+    }).select().single();
 
     if (error) {
       if (error.code === '23505') {
         return { error: 'This nozzle number already exists for this pump.' };
       }
       return { error: 'Failed to create nozzle.' };
+    }
+
+    if (insertedNozzle) {
+      await createAuditLog({
+        action: 'CREATE',
+        module: 'Nozzles',
+        recordId: insertedNozzle.id,
+        newValue: insertedNozzle,
+        userId: profile.id
+      });
     }
 
     revalidatePath(`/dashboard/pumps/${pump_id}`);
@@ -120,14 +152,24 @@ export async function addNozzle(formData: FormData) {
 
 export async function deleteNozzle(id: string, pump_id: string) {
   try {
-    await requireRole(['ADMIN', 'MANAGER']);
+    const profile = await requireRole(['ADMIN', 'MANAGER']);
     const supabase = await createClient();
+
+    const { data: oldNozzle } = await supabase.from('pump_nozzles').select('*').eq('id', id).single();
 
     const { error } = await supabase.from('pump_nozzles').delete().eq('id', id);
 
     if (error) {
       return { error: 'Failed to delete nozzle.' };
     }
+
+    await createAuditLog({
+      action: 'DELETE',
+      module: 'Nozzles',
+      recordId: id,
+      oldValue: oldNozzle,
+      userId: profile.id
+    });
 
     revalidatePath(`/dashboard/pumps/${pump_id}`);
     return { success: true };
@@ -150,7 +192,6 @@ export async function getLatestNozzleReading(nozzleId: string) {
       .single();
 
     if (error || !data) {
-      // Means this is the very first reading
       return { previous_meter: null };
     }
     
@@ -162,7 +203,7 @@ export async function getLatestNozzleReading(nozzleId: string) {
 
 export async function addPumpReading(formData: FormData) {
   try {
-    await requireRole(['ADMIN', 'MANAGER', 'SUPERVISOR', 'ATTENDANT']);
+    const profile = await requireRole(['ADMIN', 'MANAGER', 'SUPERVISOR', 'ATTENDANT']);
     const supabase = await createClient();
 
     const nozzle_id = formData.get('nozzle_id') as string;
@@ -182,7 +223,6 @@ export async function addPumpReading(formData: FormData) {
       return { error: 'Current reading cannot be less than previous reading.' };
     }
 
-    // Verify against DB explicitly to prevent manipulation
     const latestData = await getLatestNozzleReading(nozzle_id);
     if (!latestData.error && latestData.previous_meter !== null) {
       if (latestData.previous_meter !== previous_meter) {
@@ -190,8 +230,7 @@ export async function addPumpReading(formData: FormData) {
       }
     }
 
-    // `fuel_sold_liters` is a GENERATED ALWAYS AS column in the DB, so we don't insert it directly.
-    const { error } = await supabase.from('pump_readings').insert({
+    const { data: insertedReading, error } = await supabase.from('pump_readings').insert({
       nozzle_id,
       reading_date,
       reading_time,
@@ -200,10 +239,20 @@ export async function addPumpReading(formData: FormData) {
       employee_id,
       shift_id,
       notes,
-    });
+    }).select().single();
 
     if (error) {
       return { error: 'Failed to save pump reading.' };
+    }
+
+    if (insertedReading) {
+      await createAuditLog({
+        action: 'CREATE',
+        module: 'Pump Readings',
+        recordId: insertedReading.id,
+        newValue: insertedReading,
+        userId: profile.id
+      });
     }
 
     revalidatePath('/dashboard/pumps/readings');
@@ -215,13 +264,13 @@ export async function addPumpReading(formData: FormData) {
 
 export async function addPumpAssignment(formData: FormData) {
   try {
-    await requireRole(['ADMIN', 'MANAGER', 'SUPERVISOR']);
+    const profile = await requireRole(['ADMIN', 'MANAGER', 'SUPERVISOR']);
     const supabase = await createClient();
 
     const pump_id = formData.get('pump_id') as string;
     const employee_id = formData.get('employee_id') as string;
     const shift_id = formData.get('shift_id') as string;
-    const assigned_from = formData.get('assigned_from') as string; // Expects full ISO datetime
+    const assigned_from = formData.get('assigned_from') as string;
     const assigned_until = formData.get('assigned_until') as string | null;
     const status = formData.get('status') as string;
 
@@ -229,17 +278,27 @@ export async function addPumpAssignment(formData: FormData) {
       return { error: 'Missing required fields.' };
     }
 
-    const { error } = await supabase.from('pump_assignments').insert({
+    const { data: insertedAssign, error } = await supabase.from('pump_assignments').insert({
       pump_id,
       employee_id,
       shift_id,
       assigned_from,
       assigned_until: assigned_until || null,
       status,
-    });
+    }).select().single();
 
     if (error) {
       return { error: 'Failed to create pump assignment.' };
+    }
+
+    if (insertedAssign) {
+      await createAuditLog({
+        action: 'CREATE',
+        module: 'Pumps',
+        recordId: insertedAssign.id,
+        newValue: insertedAssign,
+        userId: profile.id
+      });
     }
 
     revalidatePath('/dashboard/pumps/assignments');
@@ -249,3 +308,4 @@ export async function addPumpAssignment(formData: FormData) {
     return { error: error.message };
   }
 }
+

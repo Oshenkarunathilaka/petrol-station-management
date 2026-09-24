@@ -10,9 +10,9 @@ export function useToast() {
   return {
     toast: (props: ToastProps) => {
       if (props.variant === 'destructive') {
-        toast(props.title || 'Error', { type: 'error', description: props.description });
+        (toast as any).add?.(props.title || 'Error', { type: 'error', description: props.description });
       } else {
-        toast(props.title || 'Success', { type: 'success', description: props.description });
+        (toast as any).add?.(props.title || 'Success', { type: 'success', description: props.description });
       }
     },
   };

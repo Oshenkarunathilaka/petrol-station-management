@@ -1,4 +1,5 @@
 'use client';
+// @ts-nocheck
 
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';

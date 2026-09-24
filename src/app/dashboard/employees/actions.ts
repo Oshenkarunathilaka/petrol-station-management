@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { getCurrentProfile } from '@/lib/auth-helpers';
+import { createAuditLog } from '@/lib/audit';
 
 async function requireRole(allowedRoles: string[]) {
   const profile = await getCurrentProfile();
@@ -14,7 +15,7 @@ async function requireRole(allowedRoles: string[]) {
 
 export async function addEmployee(formData: FormData) {
   try {
-    await requireRole(['ADMIN', 'MANAGER']);
+    const profile = await requireRole(['ADMIN', 'MANAGER']);
     const supabase = await createClient();
 
     const employee_code = formData.get('employee_code') as string;
@@ -30,7 +31,7 @@ export async function addEmployee(formData: FormData) {
       return { error: 'Employee ID, Name, Role, and Status are required.' };
     }
 
-    const { error } = await supabase.from('employees').insert({
+    const { data: insertedEmp, error } = await supabase.from('employees').insert({
       employee_code,
       full_name,
       phone,
@@ -39,13 +40,23 @@ export async function addEmployee(formData: FormData) {
       status,
       hire_date: hire_date || null,
       notes,
-    });
+    }).select().single();
 
     if (error) {
       if (error.code === '23505') {
         return { error: 'Employee ID or Email already exists.' };
       }
       return { error: 'Failed to add employee.' };
+    }
+
+    if (insertedEmp) {
+      await createAuditLog({
+        action: 'CREATE',
+        module: 'Employees',
+        recordId: insertedEmp.id,
+        newValue: insertedEmp,
+        userId: profile.id
+      });
     }
 
     revalidatePath('/dashboard/employees');
@@ -57,7 +68,7 @@ export async function addEmployee(formData: FormData) {
 
 export async function updateEmployee(id: string, formData: FormData) {
   try {
-    await requireRole(['ADMIN', 'MANAGER']);
+    const profile = await requireRole(['ADMIN', 'MANAGER']);
     const supabase = await createClient();
 
     const employee_code = formData.get('employee_code') as string;
@@ -72,6 +83,8 @@ export async function updateEmployee(id: string, formData: FormData) {
     if (!employee_code || !full_name || !position || !status) {
       return { error: 'Employee ID, Name, Role, and Status are required.' };
     }
+
+    const { data: oldEmp } = await supabase.from('employees').select('*').eq('id', id).single();
 
     const { error } = await supabase.from('employees').update({
       employee_code,
@@ -91,6 +104,15 @@ export async function updateEmployee(id: string, formData: FormData) {
       return { error: 'Failed to update employee.' };
     }
 
+    await createAuditLog({
+      action: 'UPDATE',
+      module: 'Employees',
+      recordId: id,
+      oldValue: oldEmp,
+      newValue: { employee_code, full_name, phone, email, position, status, hire_date, notes },
+      userId: profile.id
+    });
+
     revalidatePath('/dashboard/employees');
     revalidatePath(`/dashboard/employees/${id}`);
     return { success: true };
@@ -98,3 +120,4 @@ export async function updateEmployee(id: string, formData: FormData) {
     return { error: error.message };
   }
 }
+

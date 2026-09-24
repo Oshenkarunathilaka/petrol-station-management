@@ -72,9 +72,9 @@ export function TankTable({ tanks, fuelTypes }: TankTableProps) {
             const currentStock = latestReading ? latestReading.calculated_liters : 0;
             const isLowStock = currentStock < tank.minimum_stock_liters;
             
-            let statusVariant = 'default' as const;
-            if (tank.status === 'MAINTENANCE') statusVariant = 'outline' as const;
-            if (tank.status === 'OFFLINE') statusVariant = 'secondary' as const;
+            let statusVariant: 'default' | 'secondary' | 'outline' | 'destructive' = 'default';
+            if (tank.status === 'MAINTENANCE') statusVariant = 'outline';
+            if (tank.status === 'OFFLINE') statusVariant = 'secondary';
 
             return (
               <TableRow key={tank.id}>
@@ -82,7 +82,7 @@ export function TankTable({ tanks, fuelTypes }: TankTableProps) {
                   <div className="flex items-center gap-2">
                     {tank.tank_number}
                     {isLowStock && (
-                      <AlertTriangle className="h-4 w-4 text-destructive" title="Low Stock Warning" />
+                      <AlertTriangle className="h-4 w-4 text-destructive" />
                     )}
                   </div>
                 </TableCell>
@@ -107,11 +107,11 @@ export function TankTable({ tanks, fuelTypes }: TankTableProps) {
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
-                    <Button variant="outline" size="icon" asChild title="View Details">
-                      <Link href={`/dashboard/tanks/${tank.id}`}>
+                    <Link href={`/dashboard/tanks/${tank.id}`}>
+                      <Button variant="outline" size="icon" title="View Details">
                         <Info className="h-4 w-4" />
-                      </Link>
-                    </Button>
+                      </Button>
+                    </Link>
                     <TankForm fuelTypes={fuelTypes} tank={tank} />
                   </div>
                 </TableCell>

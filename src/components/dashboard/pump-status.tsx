@@ -2,14 +2,19 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Fuel } from 'lucide-react';
 
-const pumps = [
-  { id: 1, name: 'Pump 1', status: 'ACTIVE', fuelTypes: ['Petrol 92', 'Diesel'] },
-  { id: 2, name: 'Pump 2', status: 'ACTIVE', fuelTypes: ['Petrol 95', 'Super Diesel'] },
-  { id: 3, name: 'Pump 3', status: 'MAINTENANCE', fuelTypes: ['Petrol 92'] },
-  { id: 4, name: 'Pump 4', status: 'OFFLINE', fuelTypes: ['Diesel'] },
-];
+interface PumpStatusProps {
+  pumps: {
+    id: string;
+    status: string;
+    nozzles: {
+      number: string;
+      fuelType: string;
+      color: string;
+    }[];
+  }[];
+}
 
-export function PumpStatus() {
+export function PumpStatus({ pumps }: PumpStatusProps) {
   return (
     <Card className="col-span-1">
       <CardHeader>
@@ -29,8 +34,8 @@ export function PumpStatus() {
                   <Fuel className="h-4 w-4" />
                 </div>
                 <div>
-                  <p className="font-medium text-sm">{pump.name}</p>
-                  <p className="text-xs text-muted-foreground">{pump.fuelTypes.join(', ')}</p>
+                  <p className="font-medium text-sm">Pump {pump.id}</p>
+                  <p className="text-xs text-muted-foreground">{pump.nozzles.map(n => n.fuelType).join(', ')}</p>
                 </div>
               </div>
               <Badge 

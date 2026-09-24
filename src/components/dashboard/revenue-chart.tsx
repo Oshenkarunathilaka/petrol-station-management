@@ -3,17 +3,13 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid } from 'recharts';
 
-const data = [
-  { time: '06:00', revenue: 1200 },
-  { time: '09:00', revenue: 4500 },
-  { time: '12:00', revenue: 8900 },
-  { time: '15:00', revenue: 11200 },
-  { time: '18:00', revenue: 16500 },
-  { time: '21:00', revenue: 14300 },
-  { time: '23:59', revenue: 18900 },
-];
+const MAROON = '#9b1c2e';
 
-export function RevenueChart() {
+interface RevenueChartProps {
+  data: { time: string; revenue: number }[];
+}
+
+export function RevenueChart({ data }: RevenueChartProps) {
   return (
     <Card className="col-span-1 lg:col-span-2">
       <CardHeader>
@@ -26,37 +22,45 @@ export function RevenueChart() {
             <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                  <stop offset="5%" stopColor={MAROON} stopOpacity={0.25} />
+                  <stop offset="95%" stopColor={MAROON} stopOpacity={0.02} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--muted-foreground))" strokeOpacity={0.2} />
-              <XAxis 
-                dataKey="time" 
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" strokeOpacity={0.8} />
+              <XAxis
+                dataKey="time"
                 axisLine={false}
                 tickLine={false}
-                tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
+                tick={{ fontSize: 12, fill: '#6b7280', fontWeight: 500 }}
                 dy={10}
               />
-              <YAxis 
+              <YAxis
                 axisLine={false}
                 tickLine={false}
-                tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
-                tickFormatter={(value) => `$${value}`}
+                tick={{ fontSize: 12, fill: '#6b7280', fontWeight: 500 }}
+                tickFormatter={(value) => `Rs ${(value / 1000).toFixed(0)}k`}
                 dx={-10}
               />
-              <Tooltip 
-                contentStyle={{ borderRadius: '8px', border: '1px solid hsl(var(--border))' }}
+              <Tooltip
+                contentStyle={{
+                  borderRadius: '10px',
+                  border: `1px solid ${MAROON}40`,
+                  background: '#fff',
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.10)',
+                  color: '#1a0508',
+                }}
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                formatter={(value: any) => [`$${value}`, 'Revenue']}
+                formatter={(value: any) => [`Rs ${value.toLocaleString()}`, 'Revenue']}
               />
-              <Area 
-                type="monotone" 
-                dataKey="revenue" 
-                stroke="hsl(var(--primary))" 
-                strokeWidth={2}
-                fillOpacity={1} 
-                fill="url(#colorRevenue)" 
+              <Area
+                type="monotone"
+                dataKey="revenue"
+                stroke={MAROON}
+                strokeWidth={3}
+                fillOpacity={1}
+                fill="url(#colorRevenue)"
+                dot={false}
+                activeDot={{ r: 6, fill: MAROON, stroke: '#fff', strokeWidth: 2 }}
               />
             </AreaChart>
           </ResponsiveContainer>

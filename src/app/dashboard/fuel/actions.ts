@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { getCurrentProfile } from '@/lib/auth-helpers';
+import { createAuditLog } from '@/lib/audit';
 
 export async function addFuelType(formData: FormData) {
   const supabase = await createClient();
@@ -21,18 +22,28 @@ export async function addFuelType(formData: FormData) {
     return { error: 'Name and Code are required.' };
   }
 
-  const { error } = await supabase.from('fuel_types').insert({
+  const { data: insertedFuel, error } = await supabase.from('fuel_types').insert({
     name,
     code,
     description,
     status: status || 'ACTIVE',
-  });
+  }).select().single();
 
   if (error) {
     if (error.code === '23505') { // Unique violation
       return { error: 'A fuel type with this Name or Code already exists.' };
     }
     return { error: error.message };
+  }
+
+  if (insertedFuel) {
+    await createAuditLog({
+      action: 'CREATE',
+      module: 'Fuel',
+      recordId: insertedFuel.id,
+      newValue: insertedFuel,
+      userId: profile.id
+    });
   }
 
   revalidatePath('/dashboard/fuel/types');
@@ -57,6 +68,15 @@ export async function toggleFuelTypeStatus(id: string, currentStatus: string) {
   if (error) {
     return { error: error.message };
   }
+
+  await createAuditLog({
+    action: 'STATUS_CHANGE',
+    module: 'Fuel',
+    recordId: id,
+    oldValue: { status: currentStatus },
+    newValue: { status: newStatus },
+    userId: profile.id
+  });
 
   revalidatePath('/dashboard/fuel/types');
   return { success: true };
@@ -83,9 +103,6 @@ export async function addFuelPrice(formData: FormData) {
     return { error: 'Price must be greater than or equal to zero.' };
   }
 
-  // 1. Check for the currently active price for this fuel type
-  // A price is "active" if effective_from <= NOW and (effective_until IS NULL OR effective_until > NOW)
-  // Or simply, we just find any price where effective_until is null (meaning it's the latest indefinite price)
   const { data: currentPrices, error: currentError } = await supabase
     .from('fuel_prices')
     .select('*')
@@ -103,12 +120,10 @@ export async function addFuelPrice(formData: FormData) {
     const currentEffectiveFrom = new Date(currentPrice.effective_from).getTime();
     const newEffectiveFrom = new Date(effective_from).getTime();
 
-    // Prevent overlapping past
     if (newEffectiveFrom <= currentEffectiveFrom) {
       return { error: 'New price effective date must be strictly after the current price effective date.' };
     }
 
-    // 2. Update the old price to end when the new price begins
     const { error: updateError } = await supabase
       .from('fuel_prices')
       .update({ effective_until: effective_from })
@@ -119,8 +134,7 @@ export async function addFuelPrice(formData: FormData) {
     }
   }
 
-  // 3. Insert the new price
-  const { error: insertError } = await supabase
+  const { data: insertedPrice, error: insertError } = await supabase
     .from('fuel_prices')
     .insert({
       fuel_type_id,
@@ -128,12 +142,25 @@ export async function addFuelPrice(formData: FormData) {
       effective_from,
       effective_until,
       created_by: profile.id,
-    });
+    })
+    .select()
+    .single();
 
   if (insertError) {
     return { error: insertError.message };
   }
 
+  if (insertedPrice) {
+    await createAuditLog({
+      action: 'UPDATE',
+      module: 'Fuel Prices',
+      recordId: insertedPrice.id,
+      newValue: insertedPrice,
+      userId: profile.id
+    });
+  }
+
   revalidatePath('/dashboard/fuel/prices');
   return { success: true };
 }
+

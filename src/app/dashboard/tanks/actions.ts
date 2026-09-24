@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { getCurrentProfile } from '@/lib/auth-helpers';
+import { createAuditLog } from '@/lib/audit';
 
 // Helper to check roles
 async function requireRole(allowedRoles: string[]) {
@@ -15,7 +16,7 @@ async function requireRole(allowedRoles: string[]) {
 
 export async function addTank(formData: FormData) {
   try {
-    await requireRole(['ADMIN', 'MANAGER']);
+    const profile = await requireRole(['ADMIN', 'MANAGER']);
     const supabase = await createClient();
 
     const tank_number = formData.get('tank_number') as string;
@@ -29,14 +30,14 @@ export async function addTank(formData: FormData) {
       return { error: 'Invalid form data. Please check capacity and minimum stock values.' };
     }
 
-    const { error } = await supabase.from('tanks').insert({
+    const { data: insertedTank, error } = await supabase.from('tanks').insert({
       tank_number,
       fuel_type_id,
       capacity_liters,
       minimum_stock_liters,
       status,
       notes,
-    });
+    }).select().single();
 
     if (error) {
       if (error.code === '23505') {
@@ -44,6 +45,16 @@ export async function addTank(formData: FormData) {
       }
       console.error('Error inserting tank:', error);
       return { error: 'Failed to create tank. Please try again.' };
+    }
+
+    if (insertedTank) {
+      await createAuditLog({
+        action: 'CREATE',
+        module: 'Tanks',
+        recordId: insertedTank.id,
+        newValue: insertedTank,
+        userId: profile.id
+      });
     }
 
     revalidatePath('/dashboard/tanks');
@@ -55,7 +66,7 @@ export async function addTank(formData: FormData) {
 
 export async function updateTank(id: string, formData: FormData) {
   try {
-    await requireRole(['ADMIN', 'MANAGER']);
+    const profile = await requireRole(['ADMIN', 'MANAGER']);
     const supabase = await createClient();
 
     const tank_number = formData.get('tank_number') as string;
@@ -68,6 +79,8 @@ export async function updateTank(id: string, formData: FormData) {
     if (!tank_number || !fuel_type_id || capacity_liters <= 0 || minimum_stock_liters < 0 || minimum_stock_liters > capacity_liters) {
       return { error: 'Invalid form data. Please check capacity and minimum stock values.' };
     }
+
+    const { data: oldTank } = await supabase.from('tanks').select('*').eq('id', id).single();
 
     const { error } = await supabase.from('tanks').update({
       tank_number,
@@ -86,6 +99,15 @@ export async function updateTank(id: string, formData: FormData) {
       return { error: 'Failed to update tank. Please try again.' };
     }
 
+    await createAuditLog({
+      action: 'UPDATE',
+      module: 'Tanks',
+      recordId: id,
+      oldValue: oldTank,
+      newValue: { tank_number, fuel_type_id, capacity_liters, minimum_stock_liters, status, notes },
+      userId: profile.id
+    });
+
     revalidatePath('/dashboard/tanks');
     revalidatePath(`/dashboard/tanks/${id}`);
     return { success: true };
@@ -96,7 +118,7 @@ export async function updateTank(id: string, formData: FormData) {
 
 export async function addCalibration(formData: FormData) {
   try {
-    await requireRole(['ADMIN', 'MANAGER']);
+    const profile = await requireRole(['ADMIN', 'MANAGER']);
     const supabase = await createClient();
 
     const tank_id = formData.get('tank_id') as string;
@@ -108,12 +130,12 @@ export async function addCalibration(formData: FormData) {
       return { error: 'Invalid calibration data.' };
     }
 
-    const { error } = await supabase.from('tank_calibrations').insert({
+    const { data: insertedCal, error } = await supabase.from('tank_calibrations').insert({
       tank_id,
       height_cm,
       quantity_liters,
       status,
-    });
+    }).select().single();
 
     if (error) {
       if (error.code === '23505') {
@@ -121,6 +143,16 @@ export async function addCalibration(formData: FormData) {
       }
       console.error('Error inserting calibration:', error);
       return { error: 'Failed to create calibration entry.' };
+    }
+
+    if (insertedCal) {
+      await createAuditLog({
+        action: 'CREATE',
+        module: 'Tank Calibration',
+        recordId: insertedCal.id,
+        newValue: insertedCal,
+        userId: profile.id
+      });
     }
 
     revalidatePath('/dashboard/tanks/calibrations');
@@ -132,8 +164,10 @@ export async function addCalibration(formData: FormData) {
 
 export async function deleteCalibration(id: string) {
   try {
-    await requireRole(['ADMIN', 'MANAGER']);
+    const profile = await requireRole(['ADMIN', 'MANAGER']);
     const supabase = await createClient();
+
+    const { data: oldCal } = await supabase.from('tank_calibrations').select('*').eq('id', id).single();
 
     const { error } = await supabase.from('tank_calibrations').delete().eq('id', id);
 
@@ -141,6 +175,14 @@ export async function deleteCalibration(id: string) {
       console.error('Error deleting calibration:', error);
       return { error: 'Failed to delete calibration entry.' };
     }
+
+    await createAuditLog({
+      action: 'DELETE',
+      module: 'Tank Calibration',
+      recordId: id,
+      oldValue: oldCal,
+      userId: profile.id
+    });
 
     revalidatePath('/dashboard/tanks/calibrations');
     return { success: true };
@@ -204,7 +246,7 @@ export async function addTankReading(formData: FormData) {
       return { error: 'Calibration validation failed. The entered height does not match the calculated liters.' };
     }
 
-    const { error } = await supabase.from('tank_readings').insert({
+    const { data: insertedReading, error } = await supabase.from('tank_readings').insert({
       tank_id,
       reading_date,
       reading_time,
@@ -213,11 +255,21 @@ export async function addTankReading(formData: FormData) {
       employee_id,
       shift_id,
       notes,
-    });
+    }).select().single();
 
     if (error) {
       console.error('Error inserting tank reading:', error);
       return { error: 'Failed to save tank reading.' };
+    }
+
+    if (insertedReading) {
+      await createAuditLog({
+        action: 'CREATE',
+        module: 'Tank Readings',
+        recordId: insertedReading.id,
+        newValue: insertedReading,
+        userId: profile?.id
+      });
     }
 
     revalidatePath('/dashboard/tanks');
@@ -228,3 +280,4 @@ export async function addTankReading(formData: FormData) {
     return { error: error.message };
   }
 }
+

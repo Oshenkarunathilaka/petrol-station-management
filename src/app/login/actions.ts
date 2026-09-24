@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { createAuditLog } from '@/lib/audit'
 
 export async function login(formData: FormData) {
   const supabase = await createClient()
@@ -20,6 +21,17 @@ export async function login(formData: FormData) {
 
   if (error) {
     return { error: error.message }
+  }
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (user) {
+    await createAuditLog({
+      action: 'LOGIN',
+      module: 'Employees',
+      recordId: user.id,
+      newValue: { email: user.email },
+      userId: user.id
+    })
   }
 
   return { success: true }
@@ -82,6 +94,17 @@ export async function signup(formData: FormData) {
 
 export async function logout() {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (user) {
+    await createAuditLog({
+      action: 'LOGOUT',
+      module: 'Employees',
+      recordId: user.id,
+      oldValue: { email: user.email },
+      userId: user.id
+    })
+  }
   await supabase.auth.signOut()
   redirect('/login')
 }
+

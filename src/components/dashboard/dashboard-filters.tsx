@@ -8,50 +8,98 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
+import { useCallback } from 'react';
+import { format } from 'date-fns';
 
-export function DashboardFilters() {
+export function DashboardFilters({ fuels = [], pumps = [], shifts = [] }: { fuels?: any[], pumps?: any[], shifts?: any[] }) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const range = searchParams.get('range') || 'today';
+  const fuelTypeId = searchParams.get('fuelTypeId') || 'all';
+  const pumpId = searchParams.get('pumpId') || 'all';
+  const shiftId = searchParams.get('shiftId') || 'all';
+
+  const createQueryString = useCallback(
+    (name: string, value: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (value === 'all') {
+        params.delete(name);
+      } else {
+        params.set(name, value);
+      }
+      return params.toString();
+    },
+    [searchParams]
+  );
+
+  const setFilter = (name: string, value: string) => {
+    router.push(pathname + '?' + createQueryString(name, value));
+  };
+
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between bg-card p-4 rounded-lg border">
       <div className="flex flex-wrap items-center gap-2">
-        <Button variant="secondary" size="sm" className="h-8">Today</Button>
-        <Button variant="ghost" size="sm" className="h-8">Yesterday</Button>
-        <Button variant="ghost" size="sm" className="h-8">Last 7 Days</Button>
-        <Button variant="ghost" size="sm" className="h-8">Last 30 Days</Button>
-        <Button variant="outline" size="sm" className="h-8">Custom Range</Button>
+        <Button 
+          variant={range === 'today' ? 'secondary' : 'ghost'} 
+          size="sm" className="h-8" 
+          onClick={() => setFilter('range', 'today')}
+        >Today</Button>
+        <Button 
+          variant={range === 'yesterday' ? 'secondary' : 'ghost'} 
+          size="sm" className="h-8"
+          onClick={() => setFilter('range', 'yesterday')}
+        >Yesterday</Button>
+        <Button 
+          variant={range === '7days' ? 'secondary' : 'ghost'} 
+          size="sm" className="h-8"
+          onClick={() => setFilter('range', '7days')}
+        >Last 7 Days</Button>
+        <Button 
+          variant={range === '30days' ? 'secondary' : 'ghost'} 
+          size="sm" className="h-8"
+          onClick={() => setFilter('range', '30days')}
+        >Last 30 Days</Button>
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <Select defaultValue="all">
+        <Select value={fuelTypeId} onValueChange={(val) => setFilter('fuelTypeId', val)}>
           <SelectTrigger className="h-8 w-[130px]">
             <SelectValue placeholder="Fuel Type" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Fuels</SelectItem>
-            <SelectItem value="petrol92">Petrol Octane 92</SelectItem>
-            <SelectItem value="petrol95">Petrol Octane 95</SelectItem>
-            <SelectItem value="diesel">Auto Diesel</SelectItem>
+            {fuels.map(f => (
+              <SelectItem key={f.id} value={f.id}>{f.name}</SelectItem>
+            ))}
           </SelectContent>
         </Select>
 
-        <Select defaultValue="all">
+        <Select value={pumpId} onValueChange={(val) => setFilter('pumpId', val)}>
           <SelectTrigger className="h-8 w-[100px]">
             <SelectValue placeholder="Pump" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Pumps</SelectItem>
-            <SelectItem value="p1">Pump 1</SelectItem>
-            <SelectItem value="p2">Pump 2</SelectItem>
+            {pumps.map(p => (
+              <SelectItem key={p.id} value={p.id}>Pump {p.pump_number}</SelectItem>
+            ))}
           </SelectContent>
         </Select>
 
-        <Select defaultValue="all">
-          <SelectTrigger className="h-8 w-[120px]">
+        <Select value={shiftId} onValueChange={(val) => setFilter('shiftId', val)}>
+          <SelectTrigger className="h-8 w-[140px]">
             <SelectValue placeholder="Shift" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Shifts</SelectItem>
-            <SelectItem value="morning">Morning</SelectItem>
-            <SelectItem value="evening">Evening</SelectItem>
+            {shifts.map(s => (
+              <SelectItem key={s.id} value={s.id}>
+                {format(new Date(s.start_time), 'MMM dd, ha')} - {format(new Date(s.end_time), 'ha')}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>

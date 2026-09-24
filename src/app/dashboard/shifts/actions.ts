@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { getCurrentProfile } from '@/lib/auth-helpers';
+import { createAuditLog } from '@/lib/audit';
 
 async function requireRole(allowedRoles: string[]) {
   const profile = await getCurrentProfile();
@@ -14,7 +15,7 @@ async function requireRole(allowedRoles: string[]) {
 
 export async function addShift(formData: FormData) {
   try {
-    await requireRole(['ADMIN', 'MANAGER', 'SUPERVISOR']);
+    const profile = await requireRole(['ADMIN', 'MANAGER', 'SUPERVISOR']);
     const supabase = await createClient();
 
     const name = formData.get('name') as string;
@@ -28,17 +29,27 @@ export async function addShift(formData: FormData) {
       return { error: 'Missing required fields.' };
     }
 
-    const { error } = await supabase.from('shifts').insert({
+    const { data: insertedShift, error } = await supabase.from('shifts').insert({
       name,
       shift_date,
       start_time,
       end_time,
       status,
       notes,
-    });
+    }).select().single();
 
     if (error) {
       return { error: 'Failed to create shift.' };
+    }
+
+    if (insertedShift) {
+      await createAuditLog({
+        action: 'CREATE',
+        module: 'Shifts',
+        recordId: insertedShift.id,
+        newValue: insertedShift,
+        userId: profile.id
+      });
     }
 
     revalidatePath('/dashboard/shifts');
@@ -50,7 +61,7 @@ export async function addShift(formData: FormData) {
 
 export async function updateShift(id: string, formData: FormData) {
   try {
-    await requireRole(['ADMIN', 'MANAGER', 'SUPERVISOR']);
+    const profile = await requireRole(['ADMIN', 'MANAGER', 'SUPERVISOR']);
     const supabase = await createClient();
 
     const name = formData.get('name') as string;
@@ -63,6 +74,8 @@ export async function updateShift(id: string, formData: FormData) {
     if (!name || !shift_date || !start_time || !end_time || !status) {
       return { error: 'Missing required fields.' };
     }
+
+    const { data: oldShift } = await supabase.from('shifts').select('*').eq('id', id).single();
 
     const { error } = await supabase.from('shifts').update({
       name,
@@ -77,6 +90,16 @@ export async function updateShift(id: string, formData: FormData) {
       return { error: 'Failed to update shift.' };
     }
 
+    const isStatusChange = oldShift && oldShift.status !== status;
+    await createAuditLog({
+      action: isStatusChange ? 'STATUS_CHANGE' : 'UPDATE',
+      module: 'Shifts',
+      recordId: id,
+      oldValue: oldShift,
+      newValue: { name, shift_date, start_time, end_time, status, notes },
+      userId: profile.id
+    });
+
     revalidatePath('/dashboard/shifts');
     revalidatePath(`/dashboard/shifts/${id}`);
     return { success: true };
@@ -84,3 +107,4 @@ export async function updateShift(id: string, formData: FormData) {
     return { error: error.message };
   }
 }
+
