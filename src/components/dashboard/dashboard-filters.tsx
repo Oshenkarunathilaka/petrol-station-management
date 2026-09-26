@@ -12,7 +12,56 @@ import {
 } from '@/components/ui/select';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { useCallback } from 'react';
-import { format } from 'date-fns';
+import { format, isValid } from 'date-fns';
+
+const TIME_PATTERN = /^(\d{1,2}):(\d{2})(?::(\d{2}))?/;
+const DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})/;
+
+// Stable local reference date so formatting a time-only value never depends on "now".
+const TIME_REFERENCE = new Date(2000, 0, 1);
+
+/**
+ * Postgres `TIME` columns come back as "HH:mm:ss" strings, which `new Date()` cannot parse.
+ * This converts such a value into a real local Date, optionally rebased onto a given day.
+ */
+function toTimeDate(value: unknown, base?: Date | null): Date | null {
+  if (typeof value !== 'string') return null;
+
+  const match = TIME_PATTERN.exec(value.trim());
+  if (!match) return null;
+
+  const hours = Number(match[1]);
+  const minutes = Number(match[2]);
+  const seconds = Number(match[3] ?? 0);
+  if (hours > 23 || minutes > 59 || seconds > 59) return null;
+
+  const ref = base ?? TIME_REFERENCE;
+  const date = new Date(ref.getFullYear(), ref.getMonth(), ref.getDate(), hours, minutes, seconds);
+  return isValid(date) ? date : null;
+}
+
+/** Parses a Postgres `DATE` column ("YYYY-MM-DD") as a *local* date (avoids UTC off-by-one). */
+function toLocalDate(value: unknown): Date | null {
+  if (typeof value !== 'string') return null;
+
+  const match = DATE_PATTERN.exec(value.trim());
+  if (!match) return null;
+
+  const date = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+  return isValid(date) ? date : null;
+}
+
+function formatShiftLabel(shift: any): string {
+  const day = toLocalDate(shift?.shift_date);
+  const start = toTimeDate(shift?.start_time, day);
+  const end = toTimeDate(shift?.end_time, day);
+
+  if (!start || !end) {
+    return shift?.name || 'Shift';
+  }
+
+  return `${format(start, 'MMM dd, h:mm a')} - ${format(end, 'h:mm a')}`;
+}
 
 export function DashboardFilters({ fuels = [], pumps = [], shifts = [] }: { fuels?: any[], pumps?: any[], shifts?: any[] }) {
   const router = useRouter();
@@ -99,7 +148,7 @@ export function DashboardFilters({ fuels = [], pumps = [], shifts = [] }: { fuel
             <SelectItem value="all">All Shifts</SelectItem>
             {shifts.map(s => (
               <SelectItem key={s.id} value={s.id}>
-                {format(new Date(s.start_time), 'MMM dd, ha')} - {format(new Date(s.end_time), 'ha')}
+                {formatShiftLabel(s)}
               </SelectItem>
             ))}
           </SelectContent>

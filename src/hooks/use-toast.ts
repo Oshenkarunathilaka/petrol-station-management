@@ -10,11 +10,14 @@ type ToastProps = {
 export function useToast() {
   return {
     toast: (props: ToastProps) => {
-      if (props.variant === 'destructive') {
-        (toast as any).add?.(props.title || 'Error', { type: 'error', description: props.description });
-      } else {
-        (toast as any).add?.(props.title || 'Success', { type: 'success', description: props.description });
-      }
+      // Base UI's `add()` accepts a SINGLE options object. Passing the title as a
+      // separate first argument made the store spread a string, which produced a
+      // toast with no `title`/`description`/`type` — i.e. a blank white box.
+      toast.add({
+        title: props.title || (props.variant === 'destructive' ? 'Error' : 'Success'),
+        description: props.description,
+        type: props.variant === 'destructive' ? 'error' : 'success',
+      });
     },
   };
 }

@@ -188,10 +188,10 @@ function ToastList() {
       <ToastContent>
         <ToastIcon type={toastItem.type} />
         <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <ToastTitle />
-          <ToastDescription />
+          {toastItem.title && <ToastTitle>{toastItem.title as React.ReactNode}</ToastTitle>}
+          {toastItem.description && <ToastDescription>{toastItem.description as React.ReactNode}</ToastDescription>}
         </div>
-        <ToastAction />
+        {toastItem.actionProps && <ToastAction {...toastItem.actionProps} />}
         <ToastClose />
       </ToastContent>
     </Toast>

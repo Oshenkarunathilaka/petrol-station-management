@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { DeleteTransactionButton } from './delete-transaction-button';
 
 interface RecentTransactionsProps {
   transactions: {
@@ -45,6 +46,7 @@ export function RecentTransactions({ transactions }: RecentTransactionsProps) {
                 <TableHead>Amount</TableHead>
                 <TableHead>Payment</TableHead>
                 <TableHead>Employee</TableHead>
+                <TableHead className="w-[50px]"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -66,6 +68,9 @@ export function RecentTransactions({ transactions }: RecentTransactionsProps) {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-muted-foreground">{tx.employee}</TableCell>
+                  <TableCell>
+                    <DeleteTransactionButton transactionId={tx.fullId} />
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

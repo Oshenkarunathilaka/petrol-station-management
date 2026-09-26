@@ -122,13 +122,33 @@ export async function getDashboardKPIs(filters: DashboardFilters) {
   });
 
   // 3. Current Stock
-  let stockQuery = supabase.from('tanks').select('current_stock, capacity');
+  let stockQuery = supabase.from('tanks').select('id, capacity_liters, minimum_stock_liters, fuel_type_id');
   if (filters.fuelTypeId && filters.fuelTypeId !== 'all') {
      stockQuery.eq('fuel_type_id', filters.fuelTypeId);
   }
   const { data: tanks } = await stockQuery;
-  const currentStock = (tanks || []).reduce((sum, tank) => sum + Number(tank.current_stock || 0), 0);
+  
+  // We need to fetch the latest reading for each tank to get current stock
+  let currentStock = 0;
   const tankCount = (tanks || []).length;
+  
+  if (tanks && tanks.length > 0) {
+    const { data: readings } = await supabase
+      .from('tank_readings')
+      .select('tank_id, calculated_liters')
+      .in('tank_id', tanks.map(t => t.id))
+      .order('reading_date', { ascending: false })
+      .order('reading_time', { ascending: false });
+      
+    // Get latest for each
+    const latestStocks: Record<string, number> = {};
+    (readings || []).forEach(r => {
+      if (latestStocks[r.tank_id] === undefined) {
+        latestStocks[r.tank_id] = Number(r.calculated_liters || 0);
+        currentStock += latestStocks[r.tank_id];
+      }
+    });
+  }
 
   // 4. Active Pumps
   const { data: pumps } = await supabase.from('pumps').select('status');
@@ -294,14 +314,29 @@ export async function getOperationalAlerts() {
   const supabase = await createClient();
   
   // Low Stock Alerts (Stock < Minimum Threshold)
-  const { data: tanks } = await supabase.from('tanks').select('tank_number, current_stock, minimum_level, fuel:fuel_types(name)');
+  const { data: tanks } = await supabase.from('tanks').select('id, tank_number, minimum_stock_liters, fuel:fuel_types(name)');
+  
+  // Get latest reading for each tank to determine current stock
+  const { data: readings } = await supabase
+    .from('tank_readings')
+    .select('tank_id, calculated_liters')
+    .order('reading_date', { ascending: false })
+    .order('reading_time', { ascending: false });
+    
+  const latestStocks: Record<string, number> = {};
+  (readings || []).forEach(r => {
+    if (latestStocks[r.tank_id] === undefined) {
+      latestStocks[r.tank_id] = Number(r.calculated_liters || 0);
+    }
+  });
+
   const lowStock = (tanks || [])
-    .filter(t => Number(t.current_stock) < Number(t.minimum_level))
+    .filter(t => (latestStocks[t.id] || 0) < Number(t.minimum_stock_liters))
     .map(t => ({
       id: `tank-${t.tank_number}`,
       type: 'warning' as const,
       title: 'Low Fuel Stock',
-      message: `Tank ${t.tank_number} (${(t.fuel as any)?.name}) is below minimum level (${t.current_stock}L)`,
+      message: `Tank ${t.tank_number} (${(t.fuel as any)?.name}) is below minimum level (${latestStocks[t.id] || 0}L)`,
       time: 'Now'
     }));
 
@@ -371,7 +406,7 @@ export async function getFilterOptions() {
   const [fuelsRes, pumpsRes, shiftsRes] = await Promise.all([
     supabase.from('fuel_types').select('id, name').order('name'),
     supabase.from('pumps').select('id, pump_number').order('pump_number'),
-    supabase.from('shifts').select('id, start_time, end_time').order('start_time', { ascending: false }).limit(10)
+    supabase.from('shifts').select('id, name, shift_date, start_time, end_time').order('shift_date', { ascending: false }).order('start_time', { ascending: false }).limit(10)
   ]);
 
   return {

@@ -1,11 +1,12 @@
 /* eslint-disable */
 import { createClient } from '@/lib/supabase/server';
 import { getCurrentProfile } from '@/lib/auth-helpers';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Truck, Building2, Fuel, Container, Calendar, FileText, User, Hash, FileCheck, CheckCircle2, AlertCircle } from 'lucide-react';
 import { DeliveryActions } from './delivery-actions';
+import NewDeliveryPage from '../new/page';
 
 export const revalidate = 0;
 
@@ -14,17 +15,26 @@ export default async function DeliveryDetailPage({ params }: { params: { id: str
   const profile = await getCurrentProfile();
   const isAuthorized = profile && ['ADMIN', 'MANAGER', 'SUPERVISOR'].includes(profile.role_name);
 
-  const { data: delivery } = await supabase
+  if (params.id === 'new') {
+    // Handle Next.js route interception bug in dev mode
+    return <NewDeliveryPage />;
+  }
+
+  const { data: delivery, error } = await supabase
     .from('fuel_deliveries')
     .select(`
       *,
-      suppliers ( id, name, contact_name, phone ),
-      fuel_types ( id, name, code ),
-      tanks ( id, tank_number, capacity_liters ),
-      employees ( id, full_name, employee_code )
+      suppliers:supplier_id ( id, name, contact_name, phone ),
+      fuel_types:fuel_type_id ( id, name, code ),
+      tanks:tank_id ( id, tank_number, capacity_liters ),
+      employees:received_by ( id, full_name, employee_code )
     `)
     .eq('id', params.id)
     .single();
+
+  if (error) {
+    console.error("Error fetching delivery:", error);
+  }
 
   if (!delivery) {
     notFound();
@@ -191,7 +201,7 @@ export default async function DeliveryDetailPage({ params }: { params: { id: str
               <span className="text-muted-foreground flex items-center gap-1.5">
                 <User className="h-3.5 w-3.5" /> Received By:
               </span>
-              <span className="font-medium">{delivery.employees?.full_name || '—'}</span>
+              <span className="font-medium">{delivery.employees?.full_name || delivery.employees?.[0]?.full_name || '—'}</span>
             </div>
           </div>
         </div>

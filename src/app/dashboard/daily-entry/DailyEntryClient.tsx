@@ -10,8 +10,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Droplet, Fuel, Calculator, Save, User, TrendingUp, Loader2, Settings2 } from 'lucide-react';
-import { updateFuelPrice, submitPumpReading } from './actions';
+import { Droplet, Fuel, Calculator, Save, User, TrendingUp, Loader2, Settings2, Trash2 } from 'lucide-react';
+import { updateFuelPrice, submitPumpReading, cleanOrphanedPumpReadings } from './actions';
 
 interface FuelType {
   id: string;
@@ -50,6 +50,7 @@ export default function DailyEntryClient({
 }) {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [cleaning, setCleaning] = useState(false);
 
   // Form states for Fuel Price Update
   const [selectedFuelTypeForPrice, setSelectedFuelTypeForPrice] = useState<string>('');
@@ -150,6 +151,20 @@ export default function DailyEntryClient({
     }
   };
 
+  const handleCleanReadings = async () => {
+    if (!confirm("Are you sure you want to delete incomplete/failed meter readings?")) return;
+    
+    setCleaning(true);
+    const res = await cleanOrphanedPumpReadings();
+    setCleaning(false);
+
+    if (res.success) {
+      toast({ title: 'Success', description: `Cleaned up ${res.count} incomplete meter reading(s).` });
+    } else {
+      toast({ title: 'Error', description: res.error, variant: 'destructive' });
+    }
+  };
+
   const stats = calculateSales();
 
   return (
@@ -234,14 +249,26 @@ export default function DailyEntryClient({
         <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
           <Fuel className="h-32 w-32" />
         </div>
-        <CardHeader className="bg-blue-500/5 pb-6">
-          <CardTitle className="flex items-center text-xl gap-2 text-blue-600 dark:text-blue-400">
-            <Fuel className="h-5 w-5" />
-            Pump Reading & Sales
-          </CardTitle>
-          <CardDescription>
-            Record daily opening/closing meter, employee, and collected cash.
-          </CardDescription>
+        <CardHeader className="bg-blue-500/5 pb-6 flex flex-row items-start justify-between">
+          <div>
+            <CardTitle className="flex items-center text-xl gap-2 text-blue-600 dark:text-blue-400">
+              <Fuel className="h-5 w-5" />
+              Pump Reading & Sales
+            </CardTitle>
+            <CardDescription className="mt-1">
+              Record daily opening/closing meter, employee, and collected cash.
+            </CardDescription>
+          </div>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="shrink-0 text-red-500 hover:text-red-600 hover:bg-red-50"
+            onClick={handleCleanReadings}
+            disabled={cleaning}
+          >
+            {cleaning ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Trash2 className="h-4 w-4 mr-2" />}
+            Clean Errors
+          </Button>
         </CardHeader>
         
         <CardContent className="p-6 space-y-6">
