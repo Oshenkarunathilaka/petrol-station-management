@@ -4,7 +4,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
-import { addSupplier } from './actions';
+import { addSupplier } from '@/app/dashboard/suppliers/actions';
 
 export function AddSupplierDialog() {
   const [open, setOpen] = useState(false);

@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Truck, AlertTriangle } from 'lucide-react';
-import { createDelivery } from '../actions';
+import { createDelivery } from '@/app/dashboard/deliveries/actions';
 
 interface NewDeliveryFormProps {
   suppliers: Array<{ id: string; name: string }>;
@@ -14,6 +14,8 @@ interface NewDeliveryFormProps {
   tanks: Array<{ id: string; tank_number: string; fuel_type_id: string; capacity_liters: number }>;
   employees: Array<{ id: string; full_name: string; employee_code: string }>;
 }
+
+export const DeliveryForm = NewDeliveryForm;
 
 export function NewDeliveryForm({ suppliers, fuelTypes, tanks, employees }: NewDeliveryFormProps) {
   const router = useRouter();

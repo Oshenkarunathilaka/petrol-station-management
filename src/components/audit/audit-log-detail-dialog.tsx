@@ -20,7 +20,9 @@ interface AuditLogDetailModalProps {
   onClose: () => void;
 }
 
-export function AuditLogDetailModal({ log, isOpen, onClose }: AuditLogDetailModalProps) {
+export const AuditLogDetailModal = AuditLogDetailDialog;
+
+export function AuditLogDetailDialog({ log, isOpen, onClose }: AuditLogDetailModalProps) {
   const [copied, setCopied] = React.useState(false);
 
   if (!log) return null;

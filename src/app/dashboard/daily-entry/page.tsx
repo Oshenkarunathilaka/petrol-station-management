@@ -1,6 +1,6 @@
 /* eslint-disable */
 import { createClient } from '@/lib/supabase/server';
-import DailyEntryClient from './DailyEntryClient';
+import DailyEntryClient from '@/components/daily-entry/daily-entry-form';
 
 interface PumpRow {
   id: string;

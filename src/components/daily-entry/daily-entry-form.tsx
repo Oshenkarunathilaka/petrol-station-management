@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { Droplet, Fuel, Calculator, Save, User, TrendingUp, Loader2, Settings2, Trash2 } from 'lucide-react';
-import { updateFuelPrice, submitPumpReading, cleanOrphanedPumpReadings } from './actions';
+import { updateFuelPrice, submitPumpReading, cleanOrphanedPumpReadings } from '@/app/dashboard/daily-entry/actions';
 
 interface FuelType {
   id: string;
@@ -432,3 +432,6 @@ export default function DailyEntryClient({
     </div>
   );
 }
+
+export { DailyEntryClient, DailyEntryClient as DailyEntryForm };
+

@@ -1,6 +1,6 @@
 /* eslint-disable */
 import { createClient } from '@/lib/supabase/server';
-import { NewDeliveryForm } from './delivery-form';
+import { NewDeliveryForm } from '@/components/deliveries/delivery-form';
 
 export const revalidate = 0;
 

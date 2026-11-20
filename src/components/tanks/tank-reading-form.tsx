@@ -68,7 +68,9 @@ interface ReadingFormProps {
   shifts: Shift[];
 }
 
-export function ReadingForm({ tanks, employees, shifts }: ReadingFormProps) {
+export const ReadingForm = TankReadingForm;
+
+export function TankReadingForm({ tanks, employees, shifts }: ReadingFormProps) {
   const [open, setOpen] = useState(false);
   const [isPending, setIsPending] = useState(false);
   const [calculating, setCalculating] = useState(false);

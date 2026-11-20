@@ -1,7 +1,7 @@
 /* eslint-disable */
 import { getCurrentProfile, requirePermission } from '@/lib/auth-helpers';
 import { createClient } from '@/lib/supabase/server';
-import { ProfileClient } from './ProfileClient';
+import { ProfileClient } from '@/components/profile/profile-form';
 
 export const dynamic = 'force-dynamic';
 

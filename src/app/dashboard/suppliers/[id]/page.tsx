@@ -5,7 +5,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Building2, Phone, Mail, MapPin, User, FileText, Truck } from 'lucide-react';
-import { SupplierEditDialog } from './edit-dialog';
+import { SupplierEditDialog } from '@/components/suppliers/edit-supplier-dialog';
 
 export const revalidate = 0;
 

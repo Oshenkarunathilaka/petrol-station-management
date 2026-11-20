@@ -4,7 +4,7 @@ import { getCurrentProfile } from '@/lib/auth-helpers';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Building2, Phone, User, Eye } from 'lucide-react';
-import { AddSupplierDialog } from './add-supplier-dialog';
+import { AddSupplierDialog } from '@/components/suppliers/add-supplier-dialog';
 
 export const revalidate = 0;
 

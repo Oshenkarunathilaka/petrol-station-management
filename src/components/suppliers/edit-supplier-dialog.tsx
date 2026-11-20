@@ -4,7 +4,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Edit } from 'lucide-react';
-import { updateSupplier } from '../actions';
+import { updateSupplier } from '@/app/dashboard/suppliers/actions';
 
 interface SupplierEditDialogProps {
   supplier: {
@@ -18,6 +18,8 @@ interface SupplierEditDialogProps {
     notes: string | null;
   };
 }
+
+export const EditSupplierDialog = SupplierEditDialog;
 
 export function SupplierEditDialog({ supplier }: SupplierEditDialogProps) {
   const [open, setOpen] = useState(false);

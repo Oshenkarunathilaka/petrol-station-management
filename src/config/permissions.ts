@@ -221,13 +221,6 @@ export const SIDEBAR_NAV_ITEMS: NavItem[] = [
     allowedRoles: ['ADMIN', 'MANAGER', 'SUPERVISOR', 'CASHIER', 'ATTENDANT'],
     section: 'ANALYTICS'
   },
-  {
-    title: 'PDF Reports',
-    href: '/dashboard/reports',
-    icon: FileBarChart,
-    allowedRoles: ['ADMIN', 'MANAGER', 'SUPERVISOR', 'CASHIER', 'ATTENDANT'],
-    section: 'ANALYTICS'
-  },
 
   // SYSTEM
   {

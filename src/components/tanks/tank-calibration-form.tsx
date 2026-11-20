@@ -38,7 +38,9 @@ interface CalibrationFormProps {
   tankId: string;
 }
 
-export function CalibrationForm({ tankId }: CalibrationFormProps) {
+export const CalibrationForm = TankCalibrationForm;
+
+export function TankCalibrationForm({ tankId }: CalibrationFormProps) {
   const [open, setOpen] = useState(false);
   const [isPending, setIsPending] = useState(false);
   const { toast } = useToast();

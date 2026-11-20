@@ -5,7 +5,7 @@ import { notFound, redirect } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Truck, Building2, Fuel, Container, Calendar, FileText, User, Hash, FileCheck, CheckCircle2, AlertCircle } from 'lucide-react';
-import { DeliveryActions } from './delivery-actions';
+import { DeliveryActions } from '@/components/deliveries/delivery-status-actions';
 import NewDeliveryPage from '../new/page';
 
 export const revalidate = 0;

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Trash2, Loader2 } from 'lucide-react';
-import { deleteTransaction } from './actions';
+import { deleteTransaction } from '@/app/dashboard/actions';
 import { useToast } from '@/hooks/use-toast';
 
 export function DeleteTransactionButton({ transactionId }: { transactionId: string }) {

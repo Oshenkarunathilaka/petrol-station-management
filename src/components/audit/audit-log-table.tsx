@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/button';
 import { AuditLogItem } from '@/types/audit';
 import { format } from 'date-fns';
 import { Eye, ShieldAlert } from 'lucide-react';
-import { AuditLogDetailModal } from './audit-log-detail-modal';
+import { AuditLogDetailModal } from './audit-log-detail-dialog';
 
 interface AuditLogTableProps {
   logs: AuditLogItem[];

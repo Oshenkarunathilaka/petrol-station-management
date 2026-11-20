@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { CheckCircle2, XCircle, AlertTriangle } from 'lucide-react';
-import { confirmDelivery, cancelDelivery } from '../actions';
+import { confirmDelivery, cancelDelivery } from '@/app/dashboard/deliveries/actions';
 
 interface DeliveryActionsProps {
   deliveryId: string;
@@ -13,7 +13,9 @@ interface DeliveryActionsProps {
   isAuthorized: boolean;
 }
 
-export function DeliveryActions({ deliveryId, status, isAuthorized }: DeliveryActionsProps) {
+export const DeliveryActions = DeliveryStatusActions;
+
+export function DeliveryStatusActions({ deliveryId, status, isAuthorized }: DeliveryActionsProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

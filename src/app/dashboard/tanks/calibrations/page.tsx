@@ -1,7 +1,7 @@
 /* eslint-disable */
 import { requirePermission } from '@/lib/auth-helpers';
 import { createClient } from '@/lib/supabase/server';
-import { CalibrationForm } from '@/components/tanks/calibration-form';
+import { CalibrationForm } from '@/components/tanks/tank-calibration-form';
 import {
   Table,
   TableBody,

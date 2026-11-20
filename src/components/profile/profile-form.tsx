@@ -1,5 +1,4 @@
 /* eslint-disable */
-'use me';
 'use client';
 
 import React, { useState, useTransition } from 'react';
@@ -36,7 +35,7 @@ import {
   Check,
   AlertCircle
 } from 'lucide-react';
-import { updateProfileInfo, updatePassword } from './actions';
+import { updateProfileInfo, updatePassword } from '@/app/dashboard/profile/actions';
 
 const ROLE_COLORS: Record<string, string> = {
   ADMIN: 'bg-primary text-primary-foreground',
@@ -734,3 +733,6 @@ export function ProfileClient({ profile, employeeData }: ProfileClientProps) {
     </div>
   );
 }
+
+export { ProfileClient as ProfileForm };
+

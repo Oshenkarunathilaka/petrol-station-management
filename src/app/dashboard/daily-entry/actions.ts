@@ -119,7 +119,7 @@ export async function submitPumpReading(data: {
     // remove it to keep the daily entry all-or-nothing and avoid duplicate
     // meter readings when the user retries.
     // NOTE: pump_readings DELETE is governed by RLS, so this needs a policy that
-    // allows the operational roles (see update_schema_step21_shift_readings_rls.sql).
+    // allows the operational roles (see supabase/migrations/015_step21_shift_readings_rls.sql).
     // Surface any failure instead of letting it disappear.
     const { error: rollbackError } = await supabase
       .from('pump_readings')
